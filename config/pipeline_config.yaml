@@ -1,0 +1,58 @@
+data_ingestion:
+  ticker: "AGRO3.SA"
+  start_date: "2006-01-01"    # IPO da BrasilAgro: junho/2006
+  end_date: null              # null = data atual (resolvido em runtime)
+  frequency: "W"              # Frequência semanal (Weekly)
+
+  # BCB — Banco Central do Brasil (python-bcb)
+  bcb_series:
+    cdi: 4389        # Código da série CDI Over (% a.a.)
+    selic: 4390      # Código da série Selic (% a.a.)
+    usd_brl: 1       # Código da série PTAX USD/BRL
+
+  # FRED — Federal Reserve Economic Data
+  fred_series:
+    soy_price: "PSAVERT"     # Placeholder — atualizar com série correta do CBOT
+    corn_price: "PSAVERT"    # Placeholder — atualizar com série correta do CBOT
+
+  # RI BrasilAgro — URLs base para scraping
+  ri_base_url: "https://ri.brasilagro.com.br"
+  b3_base_url: "https://www.b3.com.br/pt_br/produtos-e-servicos/negociacao/renda-variavel/empresas-listadas.htm"
+
+  # Diretórios de saída
+  output:
+    market: "data/raw/market/"
+    fundamentals: "data/raw/fundamentals/"
+    macro: "data/raw/macro/"
+    pdfs: "data/raw/pdfs/"
+
+feature_engineering:
+  # Indicadores técnicos
+  rsi_period: 14
+  volatility_window_weeks: 4
+  momentum_windows_weeks: [1, 4, 13]   # 1w, 1m, 3m
+
+  # NLP
+  nlp:
+    model_name: "neuralmind/bert-base-portuguese-cased"   # BERTimbau
+    max_seq_length: 512
+    batch_size: 8
+    device: "auto"            # auto: usa GPU se disponível, senão CPU
+    sentiment_categories:
+      - "land_acquisition"    # Aquisições de terras
+      - "land_sale"           # Vendas/desinvestimentos
+      - "guidance"            # Guidance de gestão
+      - "macro_agro"          # Cenário macro agrícola
+
+  # Saída
+  processed_output: "data/processed/features_weekly.parquet"
+
+evaluation:
+  backtester:
+    initial_capital: 100_000.0    # R$ 100k capital inicial para simulação
+    transaction_cost_bps: 30      # 0.30% por operação (corretagem + spread)
+    rebalance_frequency: "W"      # Rebalanceamento semanal seguindo sinais do modelo
+
+logging:
+  level: "INFO"
+  format: "%(asctime)s | %(name)s | %(levelname)s | %(message)s"

@@ -1,0 +1,69 @@
+# Ambiente virtual
+.venv/
+venv/
+
+# Artefatos Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+*.egg
+
+# Dados brutos e processados (grandes demais para git; usar DVC ou storage externo)
+data/raw/
+data/processed/
+data/models/
+!data/raw/.gitkeep
+!data/processed/.gitkeep
+!data/models/.gitkeep
+
+# PDFs e arquivos binários de dados
+*.pdf
+*.parquet
+*.csv
+*.feather
+*.h5
+*.hdf5
+
+# Artefatos de modelos PyTorch
+*.pt
+*.pth
+*.ckpt
+
+# Credenciais e variáveis de ambiente — NUNCA commitar
+.env
+.env.*
+secrets.yaml
+credentials.json
+
+# Jupyter Notebooks com outputs (commitar apenas notebooks limpos)
+notebooks/**/*.ipynb
+
+# Cache de ferramentas
+.ruff_cache/
+.mypy_cache/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Logs
+*.log
+logs/
+
+# HuggingFace cache (pode ser grande)
+.cache/

@@ -1,0 +1,38 @@
+model:
+  # Janela deslizante (em semanas)
+  window_size: 52          # Hiperparâmetro principal — explorar [12, 24, 52]
+
+  # Arquitetura MLP
+  hidden_layers: [512, 256, 128, 64]
+  dropout_rates: [0.3, 0.3, 0.2, 0.2]
+  use_batch_norm: true
+  activation: "relu"       # Opções: relu, leaky_relu, gelu
+
+  # Output
+  num_classes: 3           # -1 (Vender), 0 (Aguardar), 1 (Comprar)
+
+training:
+  epochs: 200
+  batch_size: 64
+  learning_rate: 1.0e-3
+  weight_decay: 1.0e-4
+  optimizer: "adamw"       # Opções: adam, adamw, sgd
+  scheduler: "cosine"      # Opções: cosine, step, none
+  early_stopping_patience: 20
+
+  # Divisão temporal do dataset
+  train_ratio: 0.60
+  val_ratio: 0.20
+  test_ratio: 0.20
+
+  # Balanceamento de classes
+  use_class_weights: true  # CrossEntropyLoss com peso inversamente proporcional à frequência
+
+  # Reprodutibilidade
+  seed: 42
+
+target:
+  # Thresholds para construção do label Y (em pontos percentuais acima/abaixo do CDI)
+  buy_threshold_pp: 5.0    # Retorno > CDI + 5pp → COMPRAR (label=1)
+  sell_threshold_pp: -5.0  # Retorno < CDI - 5pp → VENDER (label=-1)
+  horizon_weeks: 52        # Janela futura para cálculo do retorno total

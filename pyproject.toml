@@ -1,0 +1,104 @@
+[project]
+name = "investing-agro3"
+version = "0.1.0"
+description = "MLP Value Investing classifier for AGRO3 (BrasilAgro) — Buy/Hold/Sell signals"
+readme = "README.md"
+requires-python = ">=3.12"
+authors = [{ name = "Eder Queiroz" }]
+
+dependencies = [
+    # Deep Learning
+    "torch>=2.3.0",
+    "torchvision>=0.18.0",
+
+    # NLP / Transformers
+    "transformers>=4.40.0",
+    "sentencepiece>=0.2.0",       # Tokenizadores para modelos BERT português
+    "accelerate>=0.30.0",         # Utility para inferência HuggingFace
+
+    # Dados de Mercado
+    "yfinance>=0.2.40",
+    "fundamentus>=0.1.0",
+
+    # Dados Macroeconômicos
+    "python-bcb>=0.3.0",          # API do Banco Central do Brasil
+    "pandas-datareader>=0.10.0",  # FRED e outras fontes macro
+
+    # Manipulação de Dados
+    "pandas>=2.2.0",
+    "numpy>=1.26.0",
+    "scipy>=1.13.0",
+
+    # Machine Learning (pré-processamento e métricas)
+    "scikit-learn>=1.4.0",
+
+    # Extração de PDF
+    "pdfplumber>=0.10.0",
+
+    # HTTP e Web Scraping
+    "requests>=2.31.0",
+    "httpx>=0.27.0",
+    "beautifulsoup4>=4.12.0",
+    "lxml>=5.2.0",
+
+    # Configuração
+    "pyyaml>=6.0.1",
+    "python-dotenv>=1.0.0",
+
+    # Visualização
+    "matplotlib>=3.8.0",
+    "seaborn>=0.13.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0.0",
+    "pytest-cov>=5.0.0",
+    "ruff>=0.4.0",
+    "mypy>=1.10.0",
+    "ipykernel>=6.29.0",      # Para notebooks exploratórios
+    "jupyterlab>=4.2.0",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src"]
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = [
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "F",   # pyflakes
+    "I",   # isort
+    "B",   # flake8-bugbear
+    "UP",  # pyupgrade
+    "ANN", # flake8-annotations (type hints obrigatórios)
+]
+ignore = [
+    "ANN101", # Missing type annotation for `self`
+    "ANN102", # Missing type annotation for `cls`
+]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-v --cov=src --cov-report=term-missing"
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "if __name__ == .__main__.:",
+    "raise NotImplementedError",
+]
