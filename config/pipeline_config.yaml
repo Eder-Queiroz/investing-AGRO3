@@ -9,6 +9,8 @@ data_ingestion:
     cdi: 4389        # Código da série CDI Over (% a.a.)
     selic: 4390      # Código da série Selic (% a.a.)
     usd_brl: 1       # Código da série PTAX USD/BRL
+    igpm: 189        # IGPM mensal (inflação de terras e aluguéis rurais)
+    ipca: 433        # IPCA mensal (para cálculo Selic real)
 
   # FRED — Federal Reserve Economic Data
   fred_series:

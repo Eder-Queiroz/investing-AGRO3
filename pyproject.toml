@@ -48,6 +48,10 @@ dependencies = [
     # Visualização
     "matplotlib>=3.8.0",
     "seaborn>=0.13.0",
+
+    # I/O e Resiliência
+    "pyarrow>=16.0.0",   # Parquet engine para todos os artefatos de dados
+    "tenacity>=8.3.0",   # Retry decorator para chamadas de rede
 ]
 
 [project.optional-dependencies]

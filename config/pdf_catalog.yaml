@@ -1,0 +1,1384 @@
+# BrasilAgro (AGRO3.SA) — Catálogo de PDFs para Pipeline NLP
+# Fonte: Relações com Investidores (RI) BrasilAgro / B3
+# Gerado: 2026-04-03
+# Total: ~120 documentos (releases + fatos relevantes)
+#
+# Tipos de fatos_relevantes:
+#   land_sale        — Venda de fazenda/propriedade
+#   land_acquisition — Aquisição de fazenda/propriedade
+#   estimates        — Estimativas de safra
+#   corporate        — Corporativo (recompra, emissão, incorporação, etc.)
+
+metadata:
+  ticker: "AGRO3.SA"
+  company: "BrasilAgro - Companhia Brasileira de Propriedades Agrícolas"
+  mziq_base: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/"
+
+# ---------------------------------------------------------------------------
+# Releases de Resultados Trimestrais
+# ---------------------------------------------------------------------------
+releases:
+  - label: "RELEASE DE RESULTADOS 2T26"
+    url: "https://filemanager-cdn.mziq.com/published/2c1e0dd9-31eb-4dc0-ab4d-844683600488/e08fdafd-0281-4b60-831e-1387dfaac07c_release_6m26_pt.pdf"
+    category: release
+    period: "2T26"
+    year: 2026
+    filename: "release_2T26.pdf"
+
+  - label: "RELEASE DE RESULTADOS 1T26"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/621982bf-d8fd-e54e-b60d-9e2cc2ce1cd2?origin=2"
+    category: release
+    period: "1T26"
+    year: 2026
+    filename: "release_1T26.pdf"
+
+  - label: "RELEASE DE RESULTADOS 4T25 | 2025"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/3c767cd4-048f-8773-6309-1d3cb0371bee?origin=2"
+    category: release
+    period: "4T25"
+    year: 2026
+    filename: "release_4T25.pdf"
+
+  - label: "RELEASE DE RESULTADOS 3T25 | 9M25"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/0e9eea9e-175d-ffee-218c-5eb5e7bc6de2?origin=2"
+    category: release
+    period: "3T25"
+    year: 2025
+    filename: "release_3T25.pdf"
+
+  - label: "RELEASE DE RESULTADOS 2T25 | 6M25"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/0efbf476-a526-44a8-900f-c53f7c77b7b7?origin=2"
+    category: release
+    period: "2T25"
+    year: 2025
+    filename: "release_2T25.pdf"
+
+  - label: "Release de Resultados 1T25"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/f00dc8c5-fcda-6943-39f5-06a6fb3228fe?origin=2"
+    category: release
+    period: "1T25"
+    year: 2025
+    filename: "release_1T25.pdf"
+
+  - label: "Release de Resultados 4T24 | 2024"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/64b4315c-b9db-10de-dd5a-7c37d205174a?origin=2"
+    category: release
+    period: "4T24"
+    year: 2025
+    filename: "release_4T24.pdf"
+
+  - label: "Release de Resultados 3T24 | 2024"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/3e6738d0-543f-1c95-3ea7-76de9113b86b?origin=2"
+    category: release
+    period: "3T24"
+    year: 2024
+    filename: "release_3T24.pdf"
+
+  - label: "Release de Resultados 2T24 | 6M24"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/6b0af7dd-1180-9959-ea7e-f0fe09878bca?origin=2"
+    category: release
+    period: "2T24"
+    year: 2024
+    filename: "release_2T24.pdf"
+
+  - label: "Release de Resultados 1T24"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/946921c1-dee0-861c-bb6d-bc1f6c54267d?origin=2"
+    category: release
+    period: "1T24"
+    year: 2024
+    filename: "release_1T24.pdf"
+
+  - label: "Release de Resultados 4T23 | 2023"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/496b5b05-69bb-44df-ed05-da2912e47ce8?origin=2"
+    category: release
+    period: "4T23"
+    year: 2024
+    filename: "release_4T23.pdf"
+
+  - label: "Release de Resultados 3T23 | 9M23"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/d669ba41-7740-82c8-282b-e8c452389625?origin=2"
+    category: release
+    period: "3T23"
+    year: 2023
+    filename: "release_3T23.pdf"
+
+  - label: "Release de Resultados 2T23 | 6M23"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/93045c10-c4cb-ac9e-1030-5df813076fc4?origin=2"
+    category: release
+    period: "2T23"
+    year: 2023
+    filename: "release_2T23.pdf"
+
+  - label: "Release de Resultados 1T23"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/892db5c6-31d7-ade3-be0d-d14b0523434d?origin=2"
+    category: release
+    period: "1T23"
+    year: 2023
+    filename: "release_1T23.pdf"
+
+  - label: "RELEASE DE RESULTADOS 4T22 | 2022"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/ccb0050c-3d33-d7bc-cb06-bf3caa2e2772?origin=2"
+    category: release
+    period: "4T22"
+    year: 2023
+    filename: "release_4T22.pdf"
+
+  - label: "RELEASE DE RESULTADOS 3T22 | 9M22"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/a201ffb1-4d20-a1c7-84d7-3e3b2d5f4d24?origin=2"
+    category: release
+    period: "3T22"
+    year: 2022
+    filename: "release_3T22.pdf"
+
+  - label: "RELEASE DE RESULTADOS 3T21"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/e7c8c4f5-6841-4947-a07e-4cf6d122645e?origin=2"
+    category: release
+    period: "3T21"
+    year: 2021
+    filename: "release_3T21.pdf"
+
+  - label: "RELEASE DE RESULTADOS 2T21"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/c7609929-eea1-462f-a9a7-79fb38db06f9?origin=2"
+    category: release
+    period: "2T21"
+    year: 2021
+    filename: "release_2T21.pdf"
+
+  - label: "RELEASE DE RESULTADOS 1T21"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/da0cca1d-4def-470d-b138-72f0a149fec4?origin=2"
+    category: release
+    period: "1T21"
+    year: 2021
+    filename: "release_1T21.pdf"
+
+  - label: "RELEASE DE RESULTADOS 4T20 E 2020"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/38a19a95-6004-407f-964c-91f82f26e5dd?origin=2"
+    category: release
+    period: "4T20"
+    year: 2021
+    filename: "release_4T20.pdf"
+
+  - label: "RELEASE DE RESULTADOS 3T20"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/09cad099-6273-417e-b701-442e076aa88f?origin=2"
+    category: release
+    period: "3T20"
+    year: 2020
+    filename: "release_3T20.pdf"
+
+  - label: "RELEASE DE RESULTADOS 2T20"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/d643c620-32c5-412e-88f9-2eeb99725434?origin=2"
+    category: release
+    period: "2T20"
+    year: 2020
+    filename: "release_2T20.pdf"
+
+  - label: "RELEASE DE RESULTADOS 1T20"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/c886c2fb-9ba9-487e-99b4-c43d60349339?origin=2"
+    category: release
+    period: "1T20"
+    year: 2020
+    filename: "release_1T20.pdf"
+
+  - label: "RELEASE DE RESULTADOS 4T19 E 2019"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/27532e67-e604-4027-a0da-66b6a6c94db1?origin=2"
+    category: release
+    period: "4T19"
+    year: 2020
+    filename: "release_4T19.pdf"
+
+  - label: "RELEASE DE RESULTADOS 3T19"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/6849b16f-4b96-4686-9369-509fa1f89938?origin=2"
+    category: release
+    period: "3T19"
+    year: 2019
+    filename: "release_3T19.pdf"
+
+  - label: "RELEASE DE RESULTADOS 2T19"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/6c7610fd-f60a-4d7f-aee4-7c693a902082?origin=2"
+    category: release
+    period: "2T19"
+    year: 2019
+    filename: "release_2T19.pdf"
+
+  - label: "Release de Resultados 1T19"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/997cb87a-3461-4412-9281-0b36f0e53f80?origin=2"
+    category: release
+    period: "1T19"
+    year: 2019
+    filename: "release_1T19.pdf"
+
+  - label: "Release de Resultados 4T18 e 2018"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/6263723e-7fbf-4af9-ba17-5cfcb658567f?origin=2"
+    category: release
+    period: "4T18"
+    year: 2019
+    filename: "release_4T18.pdf"
+
+  - label: "Release de Resultados 3T18"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/7b8deff9-38aa-4b1b-b3a4-f70810d978fe?origin=2"
+    category: release
+    period: "3T18"
+    year: 2018
+    filename: "release_3T18.pdf"
+
+  - label: "Release de Resultados 2T18"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/8bb9b217-0ba7-41b7-b2bf-92d06c89d5d2?origin=2"
+    category: release
+    period: "2T18"
+    year: 2018
+    filename: "release_2T18.pdf"
+
+  - label: "Release de Resultados 1T18"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/5136c173-3761-4344-85f6-e5ae7a253c8c?origin=2"
+    category: release
+    period: "1T18"
+    year: 2018
+    filename: "release_1T18.pdf"
+
+  - label: "Release de Resultados 4T17"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/878b12ed-0db0-4ec2-90fa-c3f1bb760014?origin=2"
+    category: release
+    period: "4T17"
+    year: 2018
+    filename: "release_4T17.pdf"
+
+  - label: "Release de Resultados 3T17"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/187e0281-ea9f-4036-9914-69cbca0a9e04?origin=2"
+    category: release
+    period: "3T17"
+    year: 2017
+    filename: "release_3T17.pdf"
+
+  - label: "Release de Resultados 2T17"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/d9bdb286-0ba4-4661-960d-56aed306c88f?origin=2"
+    category: release
+    period: "2T17"
+    year: 2017
+    filename: "release_2T17.pdf"
+
+  - label: "Release de Resultados 1T17"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/085239fd-4ae7-4fd8-bd9b-6055fbb0d937?origin=2"
+    category: release
+    period: "1T17"
+    year: 2017
+    filename: "release_1T17.pdf"
+
+  - label: "Release de Resultados 4T16"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/cdaecd12-c78f-47fb-85ed-4af1dc091f17?origin=2"
+    category: release
+    period: "4T16"
+    year: 2017
+    filename: "release_4T16.pdf"
+
+  - label: "Release de Resultados 3T16"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/eebe8acf-28b7-4193-9232-6f8feeec1b17?origin=2"
+    category: release
+    period: "3T16"
+    year: 2016
+    filename: "release_3T16.pdf"
+
+  - label: "Release de Resultados 2T16"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/8489e8db-d3d1-4ddb-8a5e-2cc899a6b004?origin=2"
+    category: release
+    period: "2T16"
+    year: 2016
+    filename: "release_2T16.pdf"
+
+  - label: "Release de Resultados 1T16"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/13af33ef-09ca-48c3-83b4-3a5319571711?origin=2"
+    category: release
+    period: "1T16"
+    year: 2016
+    filename: "release_1T16.pdf"
+
+  - label: "Resultados 4T15"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/6d6cff88-6b65-4a15-99fe-71df962451ce?origin=2"
+    category: release
+    period: "4T15"
+    year: 2016
+    filename: "release_4T15.pdf"
+
+  - label: "Resultados 3T15"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/213e3716-31e9-429f-83b7-c306bc47f7a2?origin=2"
+    category: release
+    period: "3T15"
+    year: 2015
+    filename: "release_3T15.pdf"
+
+  - label: "Resultados 2T15"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/ccdd57f3-5edc-40b4-a3d4-4c93a6399c97?origin=2"
+    category: release
+    period: "2T15"
+    year: 2015
+    filename: "release_2T15.pdf"
+
+  - label: "Resultados 1T15"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/9cdad094-06eb-4bef-942e-ae8a2790b8d7?origin=2"
+    category: release
+    period: "1T15"
+    year: 2015
+    filename: "release_1T15.pdf"
+
+  - label: "Resultados 4T14"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/2bbafc7e-4e06-4455-895f-18a7cc06f83d?origin=2"
+    category: release
+    period: "4T14"
+    year: 2015
+    filename: "release_4T14.pdf"
+
+  - label: "Resultados 3T14"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/b7e3559b-1129-4d81-954d-7b5416e63612?origin=2"
+    category: release
+    period: "3T14"
+    year: 2014
+    filename: "release_3T14.pdf"
+
+  - label: "Resultados 2T14"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/c7609de9-b360-4d58-9862-63244004e51f?origin=2"
+    category: release
+    period: "2T14"
+    year: 2014
+    filename: "release_2T14.pdf"
+
+  - label: "Resultados 1T14"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/83603509-033a-47e4-b142-6b0041c1ecd9?origin=2"
+    category: release
+    period: "1T14"
+    year: 2014
+    filename: "release_1T14.pdf"
+
+  - label: "Resultados 4T13"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/70a73f93-f437-451a-9793-d916d77bbcf2?origin=2"
+    category: release
+    period: "4T13"
+    year: 2014
+    filename: "release_4T13.pdf"
+
+  - label: "Resultados 3T13"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/e5ed7206-9a16-48b8-930c-dcfa0e234dd7?origin=2"
+    category: release
+    period: "3T13"
+    year: 2013
+    filename: "release_3T13.pdf"
+
+  - label: "Resultados 2T13"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/0d0142b4-40e0-4aa7-a611-7cc3ab70ed10?origin=2"
+    category: release
+    period: "2T13"
+    year: 2013
+    filename: "release_2T13.pdf"
+
+  - label: "Resultados 1T13"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/a6ef6eea-b054-49d8-a21e-7cb0b49ed177?origin=2"
+    category: release
+    period: "1T13"
+    year: 2013
+    filename: "release_1T13.pdf"
+
+  - label: "Resultados 4T12"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/91fc756e-ff49-4e5f-9d31-ca89f1adc5e3?origin=2"
+    category: release
+    period: "4T12"
+    year: 2013
+    filename: "release_4T12.pdf"
+
+  - label: "Resultados 3T12"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/5d834085-70ef-4cb2-ba22-a3f9ae07473f?origin=2"
+    category: release
+    period: "3T12"
+    year: 2012
+    filename: "release_3T12.pdf"
+
+  - label: "Resultados 2T12"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/8d408d01-07c7-46a7-a1bf-64d9931c51c0?origin=2"
+    category: release
+    period: "2T12"
+    year: 2012
+    filename: "release_2T12.pdf"
+
+  - label: "Resultados 1T12"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/cdab149b-27f6-429a-a7d6-a02bd4280afc?origin=2"
+    category: release
+    period: "1T12"
+    year: 2012
+    filename: "release_1T12.pdf"
+
+  - label: "Resultados 4T11"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/b2a605e5-3d0a-402b-9b7c-46fa87aaf8af?origin=2"
+    category: release
+    period: "4T11"
+    year: 2012
+    filename: "release_4T11.pdf"
+
+  - label: "Resultados 3T11"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/d3821dd0-1c27-4cad-8cba-5a9c512e4627?origin=2"
+    category: release
+    period: "3T11"
+    year: 2011
+    filename: "release_3T11.pdf"
+
+  - label: "Resultados 2T11"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/64cf393f-058c-40f6-b7a6-01ad47b518cb?origin=2"
+    category: release
+    period: "2T11"
+    year: 2011
+    filename: "release_2T11.pdf"
+
+  - label: "Resultados 1T11"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/1a95ad43-6198-4c54-b273-6cbc88486bb9?origin=2"
+    category: release
+    period: "1T11"
+    year: 2011
+    filename: "release_1T11.pdf"
+
+  - label: "Resultados 4T10"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/f0c21ce8-ac24-4ec5-b193-13eed40bd5b4?origin=2"
+    category: release
+    period: "4T10"
+    year: 2011
+    filename: "release_4T10.pdf"
+
+  - label: "Resultados 3T10"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/9ebf3877-8bdf-4886-af91-929fb14f2b25?origin=2"
+    category: release
+    period: "3T10"
+    year: 2010
+    filename: "release_3T10.pdf"
+
+  - label: "Resultados 2T10"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/45ce7d54-2702-4707-ab9f-bf5d851adc4e?origin=2"
+    category: release
+    period: "2T10"
+    year: 2010
+    filename: "release_2T10.pdf"
+
+  - label: "Resultados 1T10"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/b9a04c56-c200-4875-80e6-4a3015777458?origin=2"
+    category: release
+    period: "1T10"
+    year: 2010
+    filename: "release_1T10.pdf"
+
+  - label: "Resultados 4T09"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/e9cd8eb1-c65f-40c5-b938-41cda523cff6?origin=2"
+    category: release
+    period: "4T09"
+    year: 2010
+    filename: "release_4T09.pdf"
+
+  - label: "Resultados 3T09"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/bea09214-f5b4-42b2-a744-f11a4d17a13d?origin=2"
+    category: release
+    period: "3T09"
+    year: 2009
+    filename: "release_3T09.pdf"
+
+  - label: "Resultados 2T09"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/e6d3841d-07f1-4f13-9b25-9d141dd291a3?origin=2"
+    category: release
+    period: "2T09"
+    year: 2009
+    filename: "release_2T09.pdf"
+
+  - label: "Resultados 1T09"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/969ef644-566c-4e81-8a9e-dbd0cf4f2274?origin=2"
+    category: release
+    period: "1T09"
+    year: 2009
+    filename: "release_1T09.pdf"
+
+  - label: "Resultados 4T08"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/5f3e4673-6815-47dd-8fa3-b0e86882e99f?origin=2"
+    category: release
+    period: "4T08"
+    year: 2009
+    filename: "release_4T08.pdf"
+
+  - label: "Resultados 3T08"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/b573b317-7ce9-4f66-8900-e6544abdf2bd?origin=2"
+    category: release
+    period: "3T08"
+    year: 2008
+    filename: "release_3T08.pdf"
+
+  - label: "Resultados 2T08"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/81cf6eee-1b50-4a85-ba69-d97a08e3e03b?origin=2"
+    category: release
+    period: "2T08"
+    year: 2008
+    filename: "release_2T08.pdf"
+
+  - label: "Resultados 1T08"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/9baaaad7-04b0-45b4-a441-1ec3b685367a?origin=2"
+    category: release
+    period: "1T08"
+    year: 2008
+    filename: "release_1T08.pdf"
+
+  - label: "Resultados 4T07"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/f9a7ad96-d0fc-4dbd-8a12-f9577f2ef8ad?origin=2"
+    category: release
+    period: "4T07"
+    year: 2008
+    filename: "release_4T07.pdf"
+
+  - label: "Resultados 3T07"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/66d37814-49d0-482c-bc27-eb024d6fc241?origin=2"
+    category: release
+    period: "3T07"
+    year: 2007
+    filename: "release_3T07.pdf"
+
+  - label: "Resultados 2T07"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/561af8c8-0995-4935-a677-23960614ef0a?origin=2"
+    category: release
+    period: "2T07"
+    year: 2007
+    filename: "release_2T07.pdf"
+
+  - label: "Resultados 1T07"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/e63a1899-cd71-49d3-b907-094fa8c389bd?origin=2"
+    category: release
+    period: "1T07"
+    year: 2007
+    filename: "release_1T07.pdf"
+
+  - label: "Resultados 4T06"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/0bf67229-ebd1-46e8-a286-54caa187f097?origin=2"
+    category: release
+    period: "4T06"
+    year: 2007
+    filename: "release_4T06.pdf"
+
+# ---------------------------------------------------------------------------
+# Fatos Relevantes
+# ---------------------------------------------------------------------------
+fatos_relevantes:
+  # --- Estimativas de Safra ---
+  - label: "Fato Relevante - Acompanhamento das Estimativas Safra 25/26"
+    url: "https://filemanager-cdn.mziq.com/published/2c1e0dd9-31eb-4dc0-ab4d-844683600488/15f5b504-b08d-4610-8505-010d411ae737_fr_projecoes_2t26_pt.pdf"
+    category: fato_relevante
+    type: estimates
+    period: "25/26"
+    year: 2026
+    filename: "fr_estimativas_safra_2526_acomp2.pdf"
+
+  - label: "Fato Relevante - Acompanhamento das Estimativas Safra 25/26 (1)"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/e304aef6-a7ca-c053-d6ed-7ee1a7b24f85?origin=2"
+    category: fato_relevante
+    type: estimates
+    period: "25/26"
+    year: 2026
+    filename: "fr_estimativas_safra_2526_acomp1.pdf"
+
+  - label: "Fato Relevante - Estimativas Safra 25/26"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/79822000-e85a-c2d8-ae4a-ad348a8df418?origin=2"
+    category: fato_relevante
+    type: estimates
+    period: "25/26"
+    year: 2025
+    filename: "fr_estimativas_safra_2526.pdf"
+
+  - label: "Fato Relevante - Acompanhamento das Estimativas Safra 24/25 (2)"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/07baa22b-5ee1-f33d-c865-475bdb3eff15?origin=2"
+    category: fato_relevante
+    type: estimates
+    period: "24/25"
+    year: 2025
+    filename: "fr_estimativas_safra_2425_acomp2.pdf"
+
+  - label: "Fato Relevante - Acompanhamento das Estimativas Safra 24/25 (1)"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/fea2c539-3adb-9add-15ed-dc700780111f?origin=2"
+    category: fato_relevante
+    type: estimates
+    period: "24/25"
+    year: 2025
+    filename: "fr_estimativas_safra_2425_acomp1.pdf"
+
+  - label: "Fato Relevante - Estimativas Safra 24/25"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/eab8af31-d416-5678-080c-e5c18bddfccb?origin=2"
+    category: fato_relevante
+    type: estimates
+    period: "24/25"
+    year: 2024
+    filename: "fr_estimativas_safra_2425.pdf"
+
+  - label: "Fato Relevante - Acompanhamento das Estimativas Safra 23/24 (3)"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/92f1b495-668d-ec06-cbce-8473f5deda90?origin=2"
+    category: fato_relevante
+    type: estimates
+    period: "23/24"
+    year: 2024
+    filename: "fr_estimativas_safra_2324_acomp3.pdf"
+
+  - label: "Fato Relevante - Acompanhamento das Estimativas Safra 23/24 (2)"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/d3a00c45-7fc9-6f86-6f8f-d5a2c11f4008?origin=2"
+    category: fato_relevante
+    type: estimates
+    period: "23/24"
+    year: 2024
+    filename: "fr_estimativas_safra_2324_acomp2.pdf"
+
+  - label: "Fato Relevante - Acompanhamento das Estimativas Safra 23/24 (1)"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/4f138664-3da0-26d3-35ce-ceac787e3c34?origin=2"
+    category: fato_relevante
+    type: estimates
+    period: "23/24"
+    year: 2023
+    filename: "fr_estimativas_safra_2324_acomp1.pdf"
+
+  - label: "Fato Relevante - Estimativas Safra 23/24"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/99e93ea4-9ba4-8b7d-ea75-e41fff68f2fb?origin=2"
+    category: fato_relevante
+    type: estimates
+    period: "23/24"
+    year: 2023
+    filename: "fr_estimativas_safra_2324.pdf"
+
+  - label: "Fato Relevante - Estimativas Safra 22/23 (2)"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/d7cddc13-e0c7-fa6e-4bad-4bdd9c278543?origin=2"
+    category: fato_relevante
+    type: estimates
+    period: "22/23"
+    year: 2023
+    filename: "fr_estimativas_safra_2223_v2.pdf"
+
+  - label: "Fato Relevante - Estimativas Safra 22/23 (1)"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/fde6226f-f970-8c8f-e1c4-21b6b95bd764?origin=2"
+    category: fato_relevante
+    type: estimates
+    period: "22/23"
+    year: 2022
+    filename: "fr_estimativas_safra_2223.pdf"
+
+  - label: "Fato Relevante - Estimativas Safra 21/22"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/b7a8aa2f-11a9-705b-7af4-f24f0b55916c?origin=2"
+    category: fato_relevante
+    type: estimates
+    period: "21/22"
+    year: 2021
+    filename: "fr_estimativas_safra_2122.pdf"
+
+  - label: "Fato Relevante - Estimativas 2020/2021"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/d97e7b52-6a3c-4ea5-8089-6c85b4842c4c?origin=2"
+    category: fato_relevante
+    type: estimates
+    period: "20/21"
+    year: 2020
+    filename: "fr_estimativas_safra_2021.pdf"
+
+  - label: "Fato Relevante - Estimativas 2019/2020 (4)"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/d2953208-4507-491e-afcc-22a2f2f2f369?origin=2"
+    category: fato_relevante
+    type: estimates
+    period: "19/20"
+    year: 2020
+    filename: "fr_estimativas_safra_1920_v4.pdf"
+
+  - label: "Fato Relevante - Estimativas 2019/2020 (3)"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/3f6bee0a-007d-4d58-9165-f150420a1a9b?origin=2"
+    category: fato_relevante
+    type: estimates
+    period: "19/20"
+    year: 2020
+    filename: "fr_estimativas_safra_1920_v3.pdf"
+
+  - label: "Fato Relevante - Estimativas 2019/2020 (2)"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/89e56fe3-0736-4fe2-a690-41f97c8ce132?origin=2"
+    category: fato_relevante
+    type: estimates
+    period: "19/20"
+    year: 2019
+    filename: "fr_estimativas_safra_1920_v2.pdf"
+
+  - label: "Fato Relevante - Estimativas 2019/2020 (1)"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/18e29ad7-33be-4411-9034-cea597c57093?origin=2"
+    category: fato_relevante
+    type: estimates
+    period: "19/20"
+    year: 2019
+    filename: "fr_estimativas_safra_1920.pdf"
+
+  - label: "Fato Relevante - Atualização das Estimativas 2018/2019"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/78daac01-e5b6-4cd4-bd5e-cddeb544ea59?origin=2"
+    category: fato_relevante
+    type: estimates
+    period: "18/19"
+    year: 2019
+    filename: "fr_estimativas_safra_1819_atualizacao.pdf"
+
+  - label: "Fato Relevante - Estimativas 2018/2019"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/7423b2d2-533a-4b50-b421-ee84b4854cc0?origin=2"
+    category: fato_relevante
+    type: estimates
+    period: "18/19"
+    year: 2018
+    filename: "fr_estimativas_safra_1819.pdf"
+
+  # --- Vendas de Fazendas ---
+  - label: "Fato Relevante - Venda Fazenda Preferência"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/3746fe92-7618-4054-4a18-717289e6a1aa?origin=2"
+    category: fato_relevante
+    type: land_sale
+    period: null
+    year: 2025
+    filename: "fr_venda_fazenda_preferencia_2025.pdf"
+
+  - label: "Fato Relevante - Venda Fazenda Chaparral"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/893e1d10-2da2-4b72-6da8-c89493ac1b9a?origin=2"
+    category: fato_relevante
+    type: land_sale
+    period: null
+    year: 2024
+    filename: "fr_venda_fazenda_chaparral_2024.pdf"
+
+  - label: "Fato Relevante - Venda de Fazenda Jatobá (2023)"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/2f7e20c7-e6be-3a73-0bb2-a57a253f0939?origin=2"
+    category: fato_relevante
+    type: land_sale
+    period: null
+    year: 2023
+    filename: "fr_venda_fazenda_jatoba_2023.pdf"
+
+  - label: "Fato Relevante - Venda de Fazenda Araucária (2023)"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/3d597472-1d08-685c-b847-c80fddd7d598?origin=2"
+    category: fato_relevante
+    type: land_sale
+    period: null
+    year: 2023
+    filename: "fr_venda_fazenda_araucaria_2023.pdf"
+
+  - label: "Fato Relevante - Venda Fazenda Rio do Meio (2022)"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/48cce9d2-8dfd-3f4f-6c48-4e3b286679e0?origin=2"
+    category: fato_relevante
+    type: land_sale
+    period: null
+    year: 2022
+    filename: "fr_venda_fazenda_rio_do_meio_2022.pdf"
+
+  - label: "Fato Relevante - Venda Fazenda Morotí (Paraguai)"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/2af38106-d4b1-bbb5-61f8-b52627ec5b4d?origin=2"
+    category: fato_relevante
+    type: land_sale
+    period: null
+    year: 2022
+    filename: "fr_venda_fazenda_moroti_paraguai.pdf"
+
+  - label: "Fato Relevante - Venda de Fazenda Alto Taquari (2021)"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/aa8678a9-e3d3-aee6-a16f-d11ca590e510?origin=2"
+    category: fato_relevante
+    type: land_sale
+    period: null
+    year: 2021
+    filename: "fr_venda_fazenda_alto_taquari_2021.pdf"
+
+  - label: "Fato Relevante - Venda de Fazenda Rio do Meio (2021)"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/84a93849-eaff-c990-1f13-7e950d97a898?origin=2"
+    category: fato_relevante
+    type: land_sale
+    period: null
+    year: 2021
+    filename: "fr_venda_fazenda_rio_do_meio_2021.pdf"
+
+  - label: "Fato Relevante - Venda de Fazenda Jatobá (2021)"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/b18caf59-e107-4dfd-8f3b-92f0f25edb21?origin=2"
+    category: fato_relevante
+    type: land_sale
+    period: null
+    year: 2021
+    filename: "fr_venda_fazenda_jatoba_2021.pdf"
+
+  - label: "Fato Relevante - Venda Fazenda Jatobá (2019 a)"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/f50fe8a1-a086-4cdc-9390-453159f65872?origin=2"
+    category: fato_relevante
+    type: land_sale
+    period: null
+    year: 2019
+    filename: "fr_venda_fazenda_jatoba_2019a.pdf"
+
+  - label: "Fato Relevante - Venda Fazenda Alto Taquari (2019)"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/b7f1aa76-317f-482d-93cf-569f6b606e86?origin=2"
+    category: fato_relevante
+    type: land_sale
+    period: null
+    year: 2019
+    filename: "fr_venda_fazenda_alto_taquari_2019.pdf"
+
+  - label: "Fato Relevante - Venda Fazenda Jatobá (2019 b)"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/538058dd-168f-4dca-9e29-5245cf3d0de0?origin=2"
+    category: fato_relevante
+    type: land_sale
+    period: null
+    year: 2019
+    filename: "fr_venda_fazenda_jatoba_2019b.pdf"
+
+  - label: "Fato Relevante - Venda Fazenda Jatobá (2019 c)"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/9cdde9f6-882a-4fbe-9140-72adff4fd77f?origin=2"
+    category: fato_relevante
+    type: land_sale
+    period: null
+    year: 2019
+    filename: "fr_venda_fazenda_jatoba_2019c.pdf"
+
+  - label: "Fato Relevante - Venda Fazenda Alto Taquari (2018)"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/c535dcef-3797-4189-aff8-a012d4ba4a1f?origin=2"
+    category: fato_relevante
+    type: land_sale
+    period: null
+    year: 2018
+    filename: "fr_venda_fazenda_alto_taquari_2018.pdf"
+
+  - label: "Fato Relevante - Venda fazenda Jatobá (2018)"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/dca628a7-488e-48d0-b373-8e4d0c23de5f?origin=2"
+    category: fato_relevante
+    type: land_sale
+    period: null
+    year: 2018
+    filename: "fr_venda_fazenda_jatoba_2018.pdf"
+
+  - label: "Fato Relevante - Negociação venda na Bahia"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/bcd949c6-8481-4729-beee-3d6519bd3501?origin=2"
+    category: fato_relevante
+    type: land_sale
+    period: null
+    year: 2018
+    filename: "fr_negociacao_venda_bahia_2018.pdf"
+
+  - label: "Fato Relevante - Venda Fazenda ARAUCÁRIA (2017)"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/a89068aa-65a2-499f-99c0-a5b96e234977?origin=2"
+    category: fato_relevante
+    type: land_sale
+    period: null
+    year: 2017
+    filename: "fr_venda_fazenda_araucaria_2017.pdf"
+
+  - label: "Fato Relevante - Venda de Propriedade (a)"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/e799eefc-6279-4def-a695-c3ab29f6f706?origin=2"
+    category: fato_relevante
+    type: land_sale
+    period: null
+    year: 2017
+    filename: "fr_venda_propriedade_2017a.pdf"
+
+  - label: "Fato Relevante - Venda de Propriedade (b)"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/2f48ddc8-7fe5-43c1-bd81-c2d3b4bace57?origin=2"
+    category: fato_relevante
+    type: land_sale
+    period: null
+    year: 2017
+    filename: "fr_venda_propriedade_2017b.pdf"
+
+  - label: "Fato Relevante - Venda de Propriedade (c)"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/415450a5-5f1b-4777-bab9-c43aa97bd5e1?origin=2"
+    category: fato_relevante
+    type: land_sale
+    period: null
+    year: 2017
+    filename: "fr_venda_propriedade_2017c.pdf"
+
+  - label: "Fato Relevante - Venda da Fazenda Cremaq"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/15fb9978-79e3-42cb-b187-d577fbd3039c?origin=2"
+    category: fato_relevante
+    type: land_sale
+    period: null
+    year: 2015
+    filename: "fr_venda_fazenda_cremaq.pdf"
+
+  - label: "Fato Relevante - Venda da Fazenda Araucária (2015)"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/a013375f-6b62-4321-991d-22efe4666190?origin=2"
+    category: fato_relevante
+    type: land_sale
+    period: null
+    year: 2015
+    filename: "fr_venda_fazenda_araucaria_2015.pdf"
+
+  - label: "Fato Relevante - Venda de Ativos no Paraguai"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/83a34de3-bf0b-4a4a-a534-0b97e8f21101?origin=2"
+    category: fato_relevante
+    type: land_sale
+    period: null
+    year: 2014
+    filename: "fr_venda_ativos_paraguai.pdf"
+
+  - label: "Fato Relevante - Venda de parte da Fazenda Cremaq"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/934786be-c26e-46a0-b0f6-7d16c81a0fa0?origin=2"
+    category: fato_relevante
+    type: land_sale
+    period: null
+    year: 2014
+    filename: "fr_venda_parte_fazenda_cremaq.pdf"
+
+  - label: "Fato Relevante - Venda da Fazenda Araucária (2014)"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/49857b38-c5f8-4d0e-b9fe-fd41d14a0002?origin=2"
+    category: fato_relevante
+    type: land_sale
+    period: null
+    year: 2014
+    filename: "fr_venda_fazenda_araucaria_2014.pdf"
+
+  - label: "Fato Relevante - Venda da Fazenda Horizontina"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/6b7a42e5-afa9-48ab-bb46-2175317f87e1?origin=2"
+    category: fato_relevante
+    type: land_sale
+    period: null
+    year: 2013
+    filename: "fr_venda_fazenda_horizontina.pdf"
+
+  - label: "Fato Relevante - Venda da Fazenda São Pedro"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/15a18665-6f56-4c46-b0f4-b083a968ceba?origin=2"
+    category: fato_relevante
+    type: land_sale
+    period: null
+    year: 2012
+    filename: "fr_venda_fazenda_sao_pedro.pdf"
+
+  - label: "Fato Relevante - Venda da Fazenda Engenho"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/32581687-29d1-4460-aca3-94e479c6b51d?origin=2"
+    category: fato_relevante
+    type: land_sale
+    period: null
+    year: 2010
+    filename: "fr_venda_fazenda_engenho.pdf"
+
+  # --- Aquisições de Fazendas ---
+  - label: "Fato Relevante - Aquisição no Mato Grosso (2022)"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/4a8a1257-ea9e-9416-835f-1855e908f151?origin=2"
+    category: fato_relevante
+    type: land_acquisition
+    period: null
+    year: 2022
+    filename: "fr_aquisicao_mato_grosso_2022.pdf"
+
+  - label: "Fato Relevante - Aquisição na Bolívia"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/7979a4b4-631e-4339-b2ac-8f472ab512fc?origin=2"
+    category: fato_relevante
+    type: land_acquisition
+    period: null
+    year: 2021
+    filename: "fr_aquisicao_bolivia.pdf"
+
+  - label: "Fato Relevante - Aquisição e Parceria Agrícola de Fazenda (2019)"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/30290ad5-6497-4a4d-83f4-6093b15eef90?origin=2"
+    category: fato_relevante
+    type: land_acquisition
+    period: null
+    year: 2019
+    filename: "fr_aquisicao_parceria_agricola_2019.pdf"
+
+  - label: "Fato Relevante - Aquisição e Parceria Agrícola em Propriedade no Maranhão"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/1ee4b18b-d585-4e8d-aa6f-762ce9d1872d?origin=2"
+    category: fato_relevante
+    type: land_acquisition
+    period: null
+    year: 2018
+    filename: "fr_aquisicao_maranhao_2018.pdf"
+
+  - label: "Fato Relevante - Aquisição de Ativos no Paraguai"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/d9b5e869-f240-4198-b346-54006876a87b?origin=2"
+    category: fato_relevante
+    type: land_acquisition
+    period: null
+    year: 2014
+    filename: "fr_aquisicao_ativos_paraguai.pdf"
+
+  - label: "Fato Relevante - Aquisição das participações da Maeda na Joint Venture"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/585a6d46-8882-4243-9ba7-01535f3a2226?origin=2"
+    category: fato_relevante
+    type: land_acquisition
+    period: null
+    year: 2013
+    filename: "fr_aquisicao_maeda_jv.pdf"
+
+  - label: "Fato Relevante - Aquisição de propriedade no Maranhão"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/39a872a4-010a-4f01-8805-cb960b4d8aeb?origin=2"
+    category: fato_relevante
+    type: land_acquisition
+    period: null
+    year: 2012
+    filename: "fr_aquisicao_maranhao_2012.pdf"
+
+  - label: "Aquisição de propriedade no estado da Bahia (2012)"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/abfe943f-4a9d-4191-9207-9f8db0cd3db0?origin=2"
+    category: fato_relevante
+    type: land_acquisition
+    period: null
+    year: 2012
+    filename: "fr_aquisicao_bahia_2012.pdf"
+
+  - label: "Aquisição de propriedade no estado de Minas Gerais"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/00d34d30-150e-462b-96ea-fbc1f5b1b7a1?origin=2"
+    category: fato_relevante
+    type: land_acquisition
+    period: null
+    year: 2011
+    filename: "fr_aquisicao_minas_gerais.pdf"
+
+  - label: "Aquisição de Propriedade no Mato Grosso (2011)"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/9d01e5c4-42aa-49b2-834f-eb22b6010f8c?origin=2"
+    category: fato_relevante
+    type: land_acquisition
+    period: null
+    year: 2011
+    filename: "fr_aquisicao_mato_grosso_2011.pdf"
+
+  - label: "Segundo Compromisso de Compra e Venda de Propriedade na Bahia"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/c29cfbef-faa2-4b76-8f3c-e48a884e1bd5?origin=2"
+    category: fato_relevante
+    type: land_acquisition
+    period: null
+    year: 2011
+    filename: "fr_compromisso_bahia_2011.pdf"
+
+  - label: "Compromisso de Compra e Venda de Propriedade na Bahia"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/2c5a3830-d3ac-4d90-a49d-ac59b71a370f?origin=2"
+    category: fato_relevante
+    type: land_acquisition
+    period: null
+    year: 2010
+    filename: "fr_compromisso_bahia_2010.pdf"
+
+  - label: "Aquisição de Propriedade no estado de Goiás (2010)"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/96913ea7-2b36-48f4-b201-9a65ded1eff5?origin=2"
+    category: fato_relevante
+    type: land_acquisition
+    period: null
+    year: 2010
+    filename: "fr_aquisicao_goias_2010.pdf"
+
+  - label: "Aquisição de Propriedade no estado do Mato Grosso (2010)"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/8a3ed4ed-5da9-4c46-94e0-fd2801c25dec?origin=2"
+    category: fato_relevante
+    type: land_acquisition
+    period: null
+    year: 2010
+    filename: "fr_aquisicao_mato_grosso_2010.pdf"
+
+  - label: "Fazenda Chaparral - Pagamento da Primeira Parcela da Aquisição"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/19021dde-b76c-43d9-8e5c-f2f5ebbd8162?origin=2"
+    category: fato_relevante
+    type: land_acquisition
+    period: null
+    year: 2010
+    filename: "fr_chaparral_pagamento_parcela.pdf"
+
+  - label: "Aquisição de Propriedade no estado de Goiás (2009)"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/76c574bc-95a6-4845-93ac-77cb19c90ef0?origin=2"
+    category: fato_relevante
+    type: land_acquisition
+    period: null
+    year: 2009
+    filename: "fr_aquisicao_goias_2009.pdf"
+
+  - label: "Compromissos de Compra e Venda de Propriedades Rurais"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/cec7ddd1-2541-43fc-8124-f08f7e84cea9?origin=2"
+    category: fato_relevante
+    type: land_acquisition
+    period: null
+    year: 2009
+    filename: "fr_compromissos_compra_venda_rurais.pdf"
+
+  - label: "Aquisição de Propriedade no estado do Mato Grosso do Sul"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/38024a04-a661-4eed-9e6c-a1f4b5e46810?origin=2"
+    category: fato_relevante
+    type: land_acquisition
+    period: null
+    year: 2008
+    filename: "fr_aquisicao_mato_grosso_sul.pdf"
+
+  - label: "Aquisição de Propriedade no Piauí e Compromisso de Compra no Mato Grosso do Sul"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/f9e04566-b24a-4f03-859f-e0d4a97addd2?origin=2"
+    category: fato_relevante
+    type: land_acquisition
+    period: null
+    year: 2008
+    filename: "fr_aquisicao_piaui_mato_grosso_sul.pdf"
+
+  - label: "Aquisição de Propriedade Localizada no Estado da Bahia"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/e54f5cbc-3cb4-473f-81e2-71fe8f0a6daf?origin=2"
+    category: fato_relevante
+    type: land_acquisition
+    period: null
+    year: 2007
+    filename: "fr_aquisicao_bahia_2007.pdf"
+
+  - label: "Parceria com o Grupo Maeda e Compromisso de Compra e Venda Rural"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/269e2909-cfe6-4aaa-9b0b-a3dbccec4885?origin=2"
+    category: fato_relevante
+    type: land_acquisition
+    period: null
+    year: 2007
+    filename: "fr_parceria_maeda_compra_rural.pdf"
+
+  - label: "Conclusão satisfatória de condição precedente na Fazenda Nova Buriti"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/e2ea4681-2e8c-4b23-b994-e56decc16c59?origin=2"
+    category: fato_relevante
+    type: land_acquisition
+    period: null
+    year: 2010
+    filename: "fr_nova_buriti_condicao_precedente.pdf"
+
+  # --- Corporativo ---
+  - label: "Fato Relevante - Emissão de Ações (Exercício Bônus)"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/2718f010-2a2c-45af-997e-9eb91c86941d?origin=2"
+    category: fato_relevante
+    type: corporate
+    period: null
+    year: 2021
+    filename: "fr_emissao_acoes_bonus_2021.pdf"
+
+  - label: "Fato Relevante - Exercício Bônus Cape Town"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/a5c53603-91be-4943-9448-35f2479f887b?origin=2"
+    category: fato_relevante
+    type: corporate
+    period: null
+    year: 2021
+    filename: "fr_bonus_cape_town.pdf"
+
+  - label: "Fato Relevante - Precificação da oferta pública de distribuição"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/c349f35b-6cc8-49a6-87cf-17650ef2559e?origin=2"
+    category: fato_relevante
+    type: corporate
+    period: null
+    year: 2021
+    filename: "fr_precificacao_oferta_publica_2021.pdf"
+
+  - label: "Fato Relevante - Oferta pública de distribuição primária e secundária"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/4a3d15b0-2f4a-4cce-ae62-502f853e3462?origin=2"
+    category: fato_relevante
+    type: corporate
+    period: null
+    year: 2021
+    filename: "fr_oferta_publica_2021.pdf"
+
+  - label: "Fato Relevante - Potencial Oferta e Aquisição"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/059f71a1-0434-49e7-b570-a80ddb444b1a?origin=2"
+    category: fato_relevante
+    type: corporate
+    period: null
+    year: 2020
+    filename: "fr_potencial_oferta_aquisicao.pdf"
+
+  - label: "Fato Relevante - Incorporação (a)"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/830e6618-c61e-40d3-b6e8-7e9f26e88963?origin=2"
+    category: fato_relevante
+    type: corporate
+    period: null
+    year: 2019
+    filename: "fr_incorporacao_2019a.pdf"
+
+  - label: "Fato Relevante - Incorporação (b)"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/75c4b997-6958-42dd-8a73-87e1ecd79b69?origin=2"
+    category: fato_relevante
+    type: corporate
+    period: null
+    year: 2019
+    filename: "fr_incorporacao_2019b.pdf"
+
+  - label: "Fato Relevante - CRA"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/a7a0741d-18d1-4995-b57f-477e8e18ab91?origin=2"
+    category: fato_relevante
+    type: corporate
+    period: null
+    year: 2017
+    filename: "fr_cra_2017.pdf"
+
+  - label: "Fato Relevante - Certificados de Recebíveis do Agronegócio (CRA)"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/c4926d78-b275-4a44-bc09-9e9556bf6fe1?origin=2"
+    category: fato_relevante
+    type: corporate
+    period: null
+    year: 2018
+    filename: "fr_cra_2018.pdf"
+
+  - label: "Fato Relevante - Acordo de Acionistas Cresca S.A."
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/e67bd365-1f40-426d-b8ee-8236d7a3d6fe?origin=2"
+    category: fato_relevante
+    type: corporate
+    period: null
+    year: 2018
+    filename: "fr_acordo_acionistas_cresca.pdf"
+
+  - label: "Fato Relevante - Programa de Recompra (2018)"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/2ce53fd4-2bb6-4972-a705-3a13f9afb664?origin=2"
+    category: fato_relevante
+    type: corporate
+    period: null
+    year: 2018
+    filename: "fr_programa_recompra_2018.pdf"
+
+  - label: "Fato Relevante - Cancelamento de Ações em Tesouraria (2018)"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/49127971-598c-487d-ab5d-8b35cea6f6ed?origin=2"
+    category: fato_relevante
+    type: corporate
+    period: null
+    year: 2018
+    filename: "fr_cancelamento_tesouraria_2018.pdf"
+
+  - label: "Fato Relevante - Renúncia do Diretor Presidente"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/f21b8a2c-9e98-4d59-a618-03ee446fbc6b?origin=2"
+    category: fato_relevante
+    type: corporate
+    period: null
+    year: 2017
+    filename: "fr_renuncia_diretor_presidente.pdf"
+
+  - label: "Fato Relevante - Alteração no Programa de Recompra de Ações"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/53e00456-5e05-41b6-b0c6-16960ad3a3da?origin=2"
+    category: fato_relevante
+    type: corporate
+    period: null
+    year: 2016
+    filename: "fr_alteracao_recompra_acoes.pdf"
+
+  - label: "Fato Relevante - Programa de Recompra de Ações (2016)"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/84657152-7ffd-410e-940a-84bf700a89ea?origin=2"
+    category: fato_relevante
+    type: corporate
+    period: null
+    year: 2016
+    filename: "fr_programa_recompra_acoes_2016.pdf"
+
+  - label: "Fato Relevante - Cancelamento de Ações em Tesouraria (2015)"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/10e3ba09-7fbf-499f-8ddc-8be8a122673b?origin=2"
+    category: fato_relevante
+    type: corporate
+    period: null
+    year: 2015
+    filename: "fr_cancelamento_tesouraria_2015.pdf"
+
+  - label: "Fato Relevante - Isenção de imposto sobre a renda para investidor pessoa física"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/8e0f7dd3-e5c0-4e8a-a893-a2d916f2347b?origin=2"
+    category: fato_relevante
+    type: corporate
+    period: null
+    year: 2015
+    filename: "fr_isencao_irpf.pdf"
+
+  - label: "Fato Relevante - Alteração da Política de Divulgação"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/d7e08d0d-caa1-434d-94a6-e41a36fd1818?origin=2"
+    category: fato_relevante
+    type: corporate
+    period: null
+    year: 2015
+    filename: "fr_alteracao_politica_divulgacao.pdf"
+
+  - label: "Fato Relevante - Programa de Recompra de Ações (2014)"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/9d5c1181-c56a-4d1c-9771-ace4ca5a6524?origin=2"
+    category: fato_relevante
+    type: corporate
+    period: null
+    year: 2014
+    filename: "fr_programa_recompra_acoes_2014.pdf"
+
+  - label: "Fato Relevante - Aprovação do Programa de ADR"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/662e7a58-0ab9-4c9b-a0cb-1b7e0afc5c14?origin=2"
+    category: fato_relevante
+    type: corporate
+    period: null
+    year: 2013
+    filename: "fr_aprovacao_adr.pdf"
+
+  - label: "Fato Relevante - Reapresentação de Demonstrações Financeiras"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/651cdfe4-6c79-43e8-80e2-b16112a0eff6?origin=2"
+    category: fato_relevante
+    type: corporate
+    period: null
+    year: 2013
+    filename: "fr_reapresentacao_demonstracoes.pdf"
+
+  - label: "Fato Relevante - Follow on"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/f005a951-e508-486e-86ff-a708f5585f71?origin=2"
+    category: fato_relevante
+    type: corporate
+    period: null
+    year: 2012
+    filename: "fr_follow_on.pdf"
+
+  - label: "Fato Relevante - Resiliação Contrato Paraná"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/7cf718d2-40e5-4d51-9cdb-c3e43747b52c?origin=2"
+    category: fato_relevante
+    type: corporate
+    period: null
+    year: 2011
+    filename: "fr_resilicao_contrato_parana.pdf"
+
+  - label: "Fato Relevante - Contrato Paraná"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/b1b5509b-1d20-4b73-92d5-8f3883d5bc47?origin=2"
+    category: fato_relevante
+    type: corporate
+    period: null
+    year: 2010
+    filename: "fr_contrato_parana.pdf"
+
+  - label: "Fato Relevante - Arrendamento"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/f89a1833-006a-4318-83e1-44a64c27b833?origin=2"
+    category: fato_relevante
+    type: corporate
+    period: null
+    year: 2018
+    filename: "fr_arrendamento_2018.pdf"
+
+  - label: "Fato Relevante - Avaliação das Propriedades"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/9840ca07-850f-4517-a085-f1c282bb197a?origin=2"
+    category: fato_relevante
+    type: corporate
+    period: null
+    year: 2011
+    filename: "fr_avaliacao_propriedades.pdf"
+
+  - label: "Capitalização Tarpon Ethanol"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/965bfdba-4918-4589-a22b-16df7409b6d7?origin=2"
+    category: fato_relevante
+    type: corporate
+    period: null
+    year: 2009
+    filename: "fr_capitalizacao_tarpon_ethanol.pdf"
+
+  - label: "Celebração de Parceria com a BRENCO"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/56890ff3-6203-4ed6-8d30-e1a140431066?origin=2"
+    category: fato_relevante
+    type: corporate
+    period: null
+    year: 2007
+    filename: "fr_parceria_brenco.pdf"
+
+  - label: "Divulgação de intenção de compra de participação relevante"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/f866aaa4-7100-4be3-aa3f-643bf659f05d?origin=2"
+    category: fato_relevante
+    type: corporate
+    period: null
+    year: 2008
+    filename: "fr_intencao_compra_participacao.pdf"
+
+  - label: "Fato Relevante - Discussões do Conselho de Administração"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/30632eaa-a0cd-4ce5-85f0-3c1af678ff5f?origin=2"
+    category: fato_relevante
+    type: corporate
+    period: null
+    year: 2012
+    filename: "fr_discussoes_conselho.pdf"
+
+  - label: "Fato Relevante - Extinção de Compromisso de Compra e Venda no Piauí"
+    url: null
+    category: fato_relevante
+    type: corporate
+    period: null
+    year: null
+    filename: null
+    notes: "URL não disponível na fonte original"
+
+  - label: "Extinção do Compromisso de Compra e Venda de Propriedade Rural"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/52dd6949-7706-4b58-9020-931b84423bd5?origin=2"
+    category: fato_relevante
+    type: corporate
+    period: null
+    year: 2009
+    filename: "fr_extincao_compromisso_rural.pdf"
+
+  - label: "Fato Relevante (genérico)"
+    url: "https://api.mziq.com/mzfilemanager/v2/d/2c1e0dd9-31eb-4dc0-ab4d-844683600488/d70014e2-ebe1-416b-8f79-f02b1fdab2e3?origin=2"
+    category: fato_relevante
+    type: corporate
+    period: null
+    year: null
+    filename: "fr_generico.pdf"
