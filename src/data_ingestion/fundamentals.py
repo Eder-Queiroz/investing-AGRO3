@@ -1,16 +1,25 @@
 """
-Ingestão de dados fundamentalistas — AGRO3.SA via yfinance.
+Ingestão de dados fundamentalistas — AGRO3.SA via Status Invest API.
 
-Fonte: demonstrativos financeiros trimestrais (quarterly_balance_sheet,
-quarterly_income_stmt, quarterly_cashflow) do yfinance.
+Fonte primária:
+    Status Invest (/acao/getdre, /acao/getativos) — DRE e Balanço Patrimonial
+    trimestrais de 2011 a 2025 (~59 trimestres).
+
+Fonte secundária (via yfinance):
+    Preços ajustados, ações em circulação e dividendos — necessários para
+    computar P/VP, EV/EBITDA e Dividend Yield.
 
 Ratios computados:
     p_vpa           — Preço / Valor Patrimonial por Ação
     ev_ebitda       — Enterprise Value / EBITDA
-    roe             — Return on Equity
+    roe             — Return on Equity (direto do Status Invest, em %)
     net_debt_ebitda — Dívida Líquida / EBITDA
-    gross_margin    — Margem Bruta
+    gross_margin    — Margem Bruta (direta do Status Invest, em %)
     dividend_yield  — DY trailing 12 meses
+
+Cobertura:
+    2006-2011: NaN (anterior à cobertura do Status Invest)
+    2011-2025: dados completos (~59 trimestres)
 
 Proteção contra data leakage:
     Lag de 45 dias aplicado ao índice trimestral antes do merge_asof.
@@ -34,6 +43,7 @@ import pandas as pd
 import yfinance as yf
 from tenacity import retry, stop_after_attempt, wait_exponential
 
+from src.data_ingestion.status_invest import StatusInvestClient
 from src.utils.config import load_pipeline_config
 from src.utils.logger import get_logger
 from src.utils.validators import validate_columns
@@ -51,46 +61,30 @@ _REQUIRED_COLS = [
 
 _PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
 
-# Nomes alternativos por item do demonstrativo (yfinance muda entre versões)
-_BALANCE_CANDIDATES: dict[str, list[str]] = {
-    "stockholders_equity": [
-        "Stockholders Equity",
-        "Total Stockholder Equity",
-        "Common Stock Equity",
-    ],
-    "total_debt": [
-        "Total Debt",
-        "Long Term Debt And Capital Lease Obligation",
-        "Long Term Debt",
-    ],
-    "cash": [
-        "Cash And Cash Equivalents",
-        "Cash Cash Equivalents And Short Term Investments",
-        "Cash",
-    ],
+# Nomes dos campos no DRE do Status Invest (chaves exatas da API)
+_DRE_FIELDS: dict[str, str] = {
+    "ebitda": "Ebitda",
+    "gross_margin": "MargemBruta",  # pré-calculado em % → dividir por 100
+    "roe": "ROE",  # pré-calculado em % → dividir por 100
+    "total_debt": "DividaBruta",  # disponível no DRE — evita chamada extra ao getativos
 }
 
-_INCOME_CANDIDATES: dict[str, list[str]] = {
-    "total_revenue": ["Total Revenue", "Operating Revenue"],
-    "gross_profit": ["Gross Profit"],
-    "ebit": ["EBIT", "Operating Income"],
-    "net_income": ["Net Income", "Net Income Common Stockholders"],
-}
-
-_CASHFLOW_CANDIDATES: dict[str, list[str]] = {
-    "depreciation": [
-        "Depreciation And Amortization",
-        "Reconciled Depreciation",
-        "Depreciation Depletion And Amortization",
-    ],
+# Nomes dos campos no Balanço Patrimonial do Status Invest (/acao/getativos)
+# DividaBruta vem do DRE (mais completo); aqui só equity e cash.
+_BP_FIELDS: dict[str, str] = {
+    "equity": "PatrimonioLiquidoConsolidado",
+    "cash": "CaixaeEquivalentesdeCaixa",
 }
 
 
 class FundamentalsFetcher:
     """Fetcher de dados fundamentalistas para AGRO3.SA.
 
+    Fonte primária: Status Invest API (/acao/getdre, /acao/getativos).
+    Fonte secundária: yfinance (preços, ações, dividendos).
+
     Responsável por:
-    - Baixar demonstrativos trimestrais via yfinance
+    - Baixar demonstrativos trimestrais via StatusInvestClient
     - Computar ratios (P/VP, EV/EBITDA, ROE, etc.)
     - Aplicar lag de 45 dias para evitar data leakage
     - Alinhar ao spine semanal via merge_asof(direction='backward')
@@ -103,12 +97,14 @@ class FundamentalsFetcher:
     """
 
     TICKER: str = "AGRO3.SA"
+    CODE: str = "AGRO3"
     REPORTING_LAG_DAYS: int = 45
 
     def __init__(self, config: dict[str, Any] | None = None) -> None:
         cfg = config or load_pipeline_config()
         raw_output: str = cfg["data_ingestion"]["output"]["fundamentals"]
         self._output_path: Path = _PROJECT_ROOT / raw_output / "fundamentals_quarterly.parquet"
+        self._client: StatusInvestClient = StatusInvestClient()
 
     # ------------------------------------------------------------------
     # Public API
@@ -124,22 +120,23 @@ class FundamentalsFetcher:
         Returns:
             DataFrame com DatetimeIndex semanal (W-FRI), colunas:
             p_vpa, ev_ebitda, roe, net_debt_ebitda, gross_margin, dividend_yield.
-            As primeiras semanas pós-IPO (antes do primeiro lag-date) terão NaN.
+            Semanas de 2006-2011 (anterior à cobertura do Status Invest) terão NaN.
 
         Raises:
-            ValueError: Se o yfinance não retornar demonstrativos trimestrais.
+            requests.HTTPError: Se o Status Invest não responder após 3 tentativas.
+            KeyError: Se um campo esperado não existir na resposta do Status Invest.
         """
         logger.info(f"Buscando fundamentos: {self.TICKER} de {start_date} a {end_date}")
 
-        balance, income, cashflow = self._fetch_raw_statements()
+        start_year = pd.Timestamp(start_date).year
+        end_year = pd.Timestamp(end_date).year
+
+        dre, bp = self._fetch_quarterly_statements(start_year, end_year)
         price_series, shares_outstanding, dividends = self._fetch_price_and_dividends(
             start_date, end_date
         )
 
-        quarterly_df = self._compute_ratios(
-            balance, income, cashflow, price_series, shares_outstanding, dividends
-        )
-
+        quarterly_df = self._compute_ratios(dre, bp, price_series, shares_outstanding, dividends)
         lagged_df = self._apply_reporting_lag(quarterly_df)
         spine = pd.date_range(start=start_date, end=end_date, freq="W-FRI", name="date")
         weekly_df = self._merge_to_weekly_spine(lagged_df, spine)
@@ -150,7 +147,7 @@ class FundamentalsFetcher:
         if nan_count > 0:
             logger.debug(
                 f"{nan_count} semanas com NaN em fundamentos "
-                "(esperado para período pré-lag do primeiro trimestre)"
+                "(esperado para período 2006-2011 anterior à cobertura do Status Invest)"
             )
 
         logger.info(f"Fundamentos prontos: {len(weekly_df)} semanas")
@@ -179,51 +176,27 @@ class FundamentalsFetcher:
     # Private helpers
     # ------------------------------------------------------------------
 
-    @retry(
-        stop=stop_after_attempt(3),
-        wait=wait_exponential(multiplier=1, min=2, max=10),
-        reraise=True,
-    )
-    def _fetch_raw_statements(
-        self,
-    ) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
-        """Baixa os três demonstrativos trimestrais do yfinance.
+    def _fetch_quarterly_statements(
+        self, start_year: int, end_year: int
+    ) -> tuple[pd.DataFrame, pd.DataFrame]:
+        """Busca DRE e Balanço Patrimonial trimestrais via Status Invest.
 
-        yfinance retorna DataFrames onde:
-        - Colunas = datas de final de trimestre (pd.Timestamp)
-        - Índice = nome do item financeiro
-        Transpomos (.T) para obter row=trimestre, col=item.
+        Args:
+            start_year: Ano inicial.
+            end_year: Ano final.
 
         Returns:
-            Tupla (balance_sheet, income_stmt, cashflow) transpostos.
-
-        Raises:
-            ValueError: Se os demonstrativos estiverem vazios.
+            Tupla (dre_df, bp_df) com DatetimeIndex de datas de fim de trimestre.
         """
-        ticker = yf.Ticker(self.TICKER)
-
-        balance = ticker.quarterly_balance_sheet
-        income = ticker.quarterly_income_stmt
-        cashflow = ticker.quarterly_cashflow
-
-        if balance.empty or income.empty:
-            raise ValueError(f"yfinance não retornou demonstrativos trimestrais para {self.TICKER}")
-
-        # Transpõe: row=trimestre, col=item financeiro
-        balance_t = balance.T
-        income_t = income.T
-        cashflow_t = cashflow.T if not cashflow.empty else pd.DataFrame()
-
-        # Remove timezone dos índices (datas de trimestre)
-        for df in (balance_t, income_t, cashflow_t):
-            if not df.empty and df.index.tz is not None:
-                df.index = df.index.tz_convert(None)
+        dre = self._client.fetch_dre(self.CODE, start_year, end_year)
+        bp = self._client.fetch_balance(self.CODE, start_year, end_year)
 
         logger.debug(
-            f"Demonstrativos baixados: {len(balance_t)} trimestres "
-            f"({balance_t.index.min()} → {balance_t.index.max()})"
+            f"Demonstrativos obtidos: DRE={len(dre)} trimestres "
+            f"({dre.index.min()} → {dre.index.max()}), "
+            f"BP={len(bp)} trimestres"
         )
-        return balance_t, income_t, cashflow_t
+        return dre, bp
 
     @retry(
         stop=stop_after_attempt(3),
@@ -237,9 +210,8 @@ class FundamentalsFetcher:
     ) -> tuple[pd.Series, float, pd.Series]:
         """Baixa preços ajustados e dividendos para cálculo de ratios.
 
-        Preço é necessário para computar P/VP e EV/EBITDA.
-        O FundamentalsFetcher busca preços diretamente para evitar
-        dependência circular com MarketDataFetcher.
+        Ainda usa yfinance pois preços/ações/dividendos históricos estão
+        disponíveis (ao contrário dos demonstrativos financeiros trimestrais).
 
         Args:
             start_date: Data inicial.
@@ -247,6 +219,9 @@ class FundamentalsFetcher:
 
         Returns:
             Tupla (price_series, shares_outstanding, dividends_series).
+
+        Raises:
+            ValueError: Se o yfinance retornar preços vazios.
         """
         ticker = yf.Ticker(self.TICKER)
         hist = ticker.history(start=start_date, end=end_date, auto_adjust=True, actions=True)
@@ -276,61 +251,89 @@ class FundamentalsFetcher:
 
     def _compute_ratios(
         self,
-        balance: pd.DataFrame,
-        income: pd.DataFrame,
-        cashflow: pd.DataFrame,
+        dre: pd.DataFrame,
+        bp: pd.DataFrame,
         price_series: pd.Series,
         shares_outstanding: float,
         dividends: pd.Series,
     ) -> pd.DataFrame:
         """Computa os ratios fundamentalistas por trimestre.
 
+        ROE e Margem Bruta são fornecidos pelo Status Invest em % (ex: 15.3 = 15.3%).
+        P/VP, EV/EBITDA e Dívida Líq./EBITDA são calculados a partir dos dados
+        do Balanço + DRE + preços yfinance.
+
         Args:
-            balance: Balance sheet transposto (row=trimestre).
-            income: Income statement transposto.
-            cashflow: Cash flow statement transposto.
-            price_series: Série diária de preços ajustados.
-            shares_outstanding: Número de ações em circulação.
-            dividends: Série diária de dividendos por ação.
+            dre: DRE trimestral do StatusInvestClient (index=quarter end dates).
+            bp: Balanço Patrimonial trimestral do StatusInvestClient.
+            price_series: Série diária de preços ajustados (yfinance).
+            shares_outstanding: Número de ações em circulação (yfinance).
+            dividends: Série diária de dividendos por ação (yfinance).
 
         Returns:
             DataFrame trimestral com colunas de ratios.
+
+        Raises:
+            KeyError: Se um campo esperado não existir no DRE ou BP.
         """
         ratios: dict[str, pd.Series] = {}
 
-        # --- Extrai itens do balanço ---
-        equity = self._safe_get_column(balance, _BALANCE_CANDIDATES["stockholders_equity"])
-        total_debt = self._safe_get_column(balance, _BALANCE_CANDIDATES["total_debt"])
-        cash = self._safe_get_column(balance, _BALANCE_CANDIDATES["cash"])
+        # quarter_dates é o índice canônico — DRE define a granularidade.
+        # BP pode ter datas ligeiramente diferentes; reindexar para dre.index
+        # antes de qualquer aritmética evita union-index silencioso.
+        quarter_dates = dre.index
 
         # --- Extrai itens do DRE ---
-        revenue = self._safe_get_column(income, _INCOME_CANDIDATES["total_revenue"])
-        gross_profit = self._safe_get_column(income, _INCOME_CANDIDATES["gross_profit"])
-        ebit = self._safe_get_column(income, _INCOME_CANDIDATES["ebit"])
-        net_income = self._safe_get_column(income, _INCOME_CANDIDATES["net_income"])
+        try:
+            ebitda = dre[_DRE_FIELDS["ebitda"]].reindex(quarter_dates).astype(float)
+            gross_margin_pct = (
+                dre[_DRE_FIELDS["gross_margin"]].reindex(quarter_dates).astype(float)
+            )
+            roe_pct = dre[_DRE_FIELDS["roe"]].reindex(quarter_dates).astype(float)
+            total_debt = dre[_DRE_FIELDS["total_debt"]].reindex(quarter_dates).astype(float)
+        except KeyError as exc:
+            raise KeyError(
+                f"Campo do DRE não encontrado: {exc}. "
+                f"Colunas disponíveis: {dre.columns.tolist()}"
+            ) from exc
 
-        # --- EBITDA = EBIT + D&A (yfinance não fornece EBITDA diretamente) ---
-        if not cashflow.empty:
-            depr = self._safe_get_column(cashflow, _CASHFLOW_CANDIDATES["depreciation"])
-            ebitda = ebit + depr
-        else:
-            logger.warning("Cash flow vazio — usando EBIT como proxy de EBITDA")
-            ebitda = ebit
+        # --- Extrai itens do Balanço (equity e cash apenas) ---
+        try:
+            equity = bp[_BP_FIELDS["equity"]].reindex(quarter_dates).astype(float)
+            cash = bp[_BP_FIELDS["cash"]].reindex(quarter_dates).astype(float)
+        except KeyError as exc:
+            raise KeyError(
+                f"Campo do Balanço Patrimonial não encontrado: {exc}. "
+                f"Colunas disponíveis: {bp.columns.tolist()}"
+            ) from exc
 
         # --- Preço no final de cada trimestre ---
-        # Usamos o preço do último dia do trimestre (ou o mais próximo anterior)
-        quarter_dates = balance.index
         price_at_quarter_end = price_series.reindex(quarter_dates, method="nearest")
 
-        # --- Dívida líquida ---
+        # --- Dívida líquida e Market Cap ---
         net_debt = (total_debt - cash).fillna(0.0)
-
-        # --- Market Cap no final do trimestre ---
         market_cap = price_at_quarter_end * shares_outstanding
+
+        # --- ROE (Status Invest fornece em %) ---
+        ratios["roe"] = pd.Series(
+            (roe_pct / 100.0).values,
+            index=quarter_dates,
+        )
+
+        # --- Margem Bruta (Status Invest fornece em %) ---
+        ratios["gross_margin"] = pd.Series(
+            (gross_margin_pct / 100.0).values,
+            index=quarter_dates,
+        )
+
+        # --- Dívida Líquida / EBITDA ---
+        ratios["net_debt_ebitda"] = pd.Series(
+            np.where(ebitda > 0, net_debt / ebitda, np.nan),
+            index=quarter_dates,
+        )
 
         # --- P/VPA ---
         book_value_per_share = equity / shares_outstanding
-        # np.where para proteger contra book_value <= 0
         ratios["p_vpa"] = pd.Series(
             np.where(book_value_per_share > 0, price_at_quarter_end / book_value_per_share, np.nan),
             index=quarter_dates,
@@ -343,31 +346,12 @@ class FundamentalsFetcher:
             index=quarter_dates,
         )
 
-        # --- ROE ---
-        ratios["roe"] = pd.Series(
-            np.where(equity != 0, net_income / equity, np.nan),
-            index=quarter_dates,
-        )
-
-        # --- Dívida Líquida / EBITDA ---
-        ratios["net_debt_ebitda"] = pd.Series(
-            np.where(ebitda > 0, net_debt / ebitda, np.nan),
-            index=quarter_dates,
-        )
-
-        # --- Margem Bruta ---
-        ratios["gross_margin"] = pd.Series(
-            np.where(revenue > 0, gross_profit / revenue, np.nan),
-            index=quarter_dates,
-        )
-
         # --- Dividend Yield (trailing 12 meses) ---
-        # Soma dividendos dos últimos 12 meses antes do final do trimestre
         dy_values: list[float] = []
         for q_date in quarter_dates:
             trailing_12m_start = q_date - pd.DateOffset(months=12)
             mask = (dividends.index >= trailing_12m_start) & (dividends.index <= q_date)
-            divs_sum = dividends.loc[mask].sum()
+            divs_sum = dividends.loc[mask].sum() if not dividends.empty else 0.0
             price = price_at_quarter_end.get(q_date, np.nan)
             dy = divs_sum / price if (price and price > 0) else np.nan
             dy_values.append(dy)
@@ -413,7 +397,7 @@ class FundamentalsFetcher:
         Returns:
             DataFrame alinhado ao spine com forward-fill implícito do merge_asof.
         """
-        spine_df = pd.DataFrame(index=spine).reset_index()  # coluna "date"
+        spine_df = pd.DataFrame(index=spine).reset_index()
 
         # reset_index() produz "date" se o índice tiver esse nome,
         # ou "index" caso contrário. Normaliza para "date".
@@ -431,37 +415,11 @@ class FundamentalsFetcher:
         merged = merged.set_index("date")
         return merged
 
-    @staticmethod
-    def _safe_get_column(df: pd.DataFrame, candidates: list[str]) -> pd.Series:
-        """Retorna a primeira coluna encontrada dentre os candidatos.
-
-        Robustez a mudanças nos nomes de colunas do yfinance entre versões.
-
-        Args:
-            df: DataFrame de demonstrativo financeiro.
-            candidates: Nomes alternativos em ordem de preferência.
-
-        Returns:
-            Série correspondente.
-
-        Raises:
-            KeyError: Se nenhum candidato for encontrado.
-        """
-        for col in candidates:
-            if col in df.columns:
-                return df[col].astype(float)
-        raise KeyError(
-            f"Nenhum dos candidatos encontrado: {candidates}. "
-            f"Colunas disponíveis: {df.columns.tolist()}"
-        )
-
 
 # ---------------------------------------------------------------------------
 # Execução standalone: uv run python -m src.data_ingestion.fundamentals
 # ---------------------------------------------------------------------------
 if __name__ == "__main__":  # pragma: no cover
-    import pandas as pd
-
     cfg = load_pipeline_config()
     di_cfg = cfg["data_ingestion"]
     end = di_cfg["end_date"] or pd.Timestamp.today().strftime("%Y-%m-%d")
