@@ -466,24 +466,26 @@ class TestRemapLabels:
         y = np.array([0], dtype=np.int8)
         assert remap_labels(y)[0] == 1
 
-    def test_one_maps_to_two(self) -> None:
+    def test_one_maps_to_one(self) -> None:
+        """BUY (1) → NOT-SELL (1) no binário."""
         y = np.array([1], dtype=np.int8)
-        assert remap_labels(y)[0] == 2
+        assert remap_labels(y)[0] == 1
 
     def test_full_mapping_explicit(self) -> None:
+        """SELL=-1→0; HOLD=0→1; BUY=1→1 (binário)."""
         y = np.array([-1, 0, 1, -1, 1, 0], dtype=np.int8)
-        expected = np.array([0, 1, 2, 0, 2, 1], dtype=np.int64)
+        expected = np.array([0, 1, 1, 0, 1, 1], dtype=np.int64)
         np.testing.assert_array_equal(remap_labels(y), expected)
 
     def test_output_dtype_is_int64(self) -> None:
         y = np.array([-1, 0, 1], dtype=np.int8)
         assert remap_labels(y).dtype == np.int64
 
-    def test_reversible(self) -> None:
-        """remapped - 1 deve recuperar os labels originais."""
-        y = np.array([-1, 0, 1, -1, 0], dtype=np.int8)
-        y_remapped = remap_labels(y)
-        np.testing.assert_array_equal(y_remapped - 1, y)
+    def test_sell_always_zero(self) -> None:
+        """SELL (-1) é sempre mapeado para 0, NOT-SELL para 1."""
+        y = np.array([-1, -1, 0, 1, -1], dtype=np.int8)
+        result = remap_labels(y)
+        np.testing.assert_array_equal(result, [0, 0, 1, 1, 0])
 
     def test_invalid_value_raises(self) -> None:
         y = np.array([0, 1, 2], dtype=np.int8)  # 2 é inválido
@@ -501,10 +503,10 @@ class TestRemapLabels:
         result = remap_labels(y)
         assert set(int(v) for v in result) == {1}
 
-    def test_output_values_subset_of_012(self) -> None:
+    def test_output_values_subset_of_01(self) -> None:
         y = np.array([-1, 0, 1], dtype=np.int8)
         result = remap_labels(y)
-        assert set(int(v) for v in result).issubset({0, 1, 2})
+        assert set(int(v) for v in result).issubset({0, 1})
 
 
 # ---------------------------------------------------------------------------

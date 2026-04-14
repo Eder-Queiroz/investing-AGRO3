@@ -58,15 +58,24 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.utils.class_weight import compute_class_weight
 from torch.utils.data import DataLoader
 
-from src.models.dataset import create_datasets
+from src.feature_engineering.sliding_window import (
+    MODEL_FEATURE_COLS,
+    build_windows,
+    compute_valid_indices,
+    compute_walk_forward_splits,
+    fit_scaler,
+    load_features_parquet,
+    remap_labels,
+)
+from src.models.dataset import AgRo3Dataset, create_datasets
 from src.models.mlp import build_mlp_from_config
 from src.utils.config import load_model_config
 from src.utils.logger import get_logger
 
 logger: logging.Logger = get_logger(__name__)
 
-# Mapeamento de índice → rótulo legível
-_CLASS_NAMES: dict[int, str] = {0: "SELL", 1: "HOLD", 2: "BUY"}
+# Mapeamento de índice → rótulo legível (binário: SELL vs. NOT-SELL)
+_CLASS_NAMES: dict[int, str] = {0: "SELL", 1: "NOT-SELL"}
 
 
 # ---------------------------------------------------------------------------
@@ -87,8 +96,7 @@ class MetricsBundle:
     val_acc: float
     val_f1_macro: float  # métrica primária de early stopping
     val_f1_sell: float
-    val_f1_hold: float
-    val_f1_buy: float
+    val_f1_not_sell: float
 
     def log_summary(self) -> None:
         """Emite uma linha de log INFO com o resumo da época."""
@@ -99,8 +107,7 @@ class MetricsBundle:
             f"val_acc={self.val_acc:.3f} | "
             f"f1_macro={self.val_f1_macro:.4f} | "
             f"f1[SELL={self.val_f1_sell:.3f} "
-            f"HOLD={self.val_f1_hold:.3f} "
-            f"BUY={self.val_f1_buy:.3f}]"
+            f"NOT-SELL={self.val_f1_not_sell:.3f}]"
         )
 
 
@@ -193,7 +200,7 @@ def compute_class_weights(
 
     Args:
         y_train: Array 1D de inteiros com labels em {0, 1, ..., num_classes-1}.
-        num_classes: Total de classes (3 para SELL/HOLD/BUY).
+        num_classes: Total de classes (2 para SELL/NOT-SELL).
         device: Dispositivo alvo do tensor retornado.
 
     Returns:
@@ -386,8 +393,7 @@ class Trainer:
             val_acc=val_acc,
             val_f1_macro=f1_macro,
             val_f1_sell=float(f1_per_class[0]),
-            val_f1_hold=float(f1_per_class[1]),
-            val_f1_buy=float(f1_per_class[2]),
+            val_f1_not_sell=float(f1_per_class[1]),
         )
 
     # ------------------------------------------------------------------
@@ -552,13 +558,13 @@ class Trainer:
 
         y_pred = np.concatenate(all_preds)
         y_true = np.concatenate(all_targets)
-        cm = confusion_matrix(y_true, y_pred, labels=[0, 1, 2])
+        cm = confusion_matrix(y_true, y_pred, labels=[0, 1])
 
         logger.info(f"Confusion Matrix [{label}]:")
-        logger.info("  Classes: SELL(0), HOLD(1), BUY(2)")
-        logger.info("  Pred →    SELL   HOLD    BUY")
+        logger.info("  Classes: SELL(0), NOT-SELL(1)")
+        logger.info("  Pred →    SELL  NOT-SELL")
         for i, row in enumerate(cm):
-            logger.info(f"  {_CLASS_NAMES[i]:6s} ↓  {row[0]:5d}  {row[1]:5d}  {row[2]:5d}")
+            logger.info(f"  {_CLASS_NAMES[i]:10s} ↓  {row[0]:5d}  {row[1]:5d}")
 
 
 def _get_input_dim(model: nn.Module) -> int:
@@ -574,40 +580,64 @@ def _get_input_dim(model: nn.Module) -> int:
 # ---------------------------------------------------------------------------
 
 
-def main() -> None:
-    """Entry point: uv run python -m src.models.trainer
-
-    Executa o pipeline completo:
-      1. Carrega config e define seeds
-      2. Detecta device (cuda → mps → cpu)
-      3. Cria datasets via create_datasets()
-      4. Computa class weights do train
-      5. Instancia modelo e Trainer
-      6. Treina com early stopping
-      7. Avalia no test set com o melhor checkpoint
-    """
-    cfg = load_model_config()
-
-    # Reprodutibilidade
-    seed: int = cfg["training"]["seed"]
-    torch.manual_seed(seed)
-    np.random.seed(seed)
-    random.seed(seed)
-    logger.info(f"Seeds definidos: {seed}")
-
-    # Seleção de device: cuda → mps (Apple Silicon) → cpu
+def _select_device() -> torch.device:
     if torch.cuda.is_available():
-        device = torch.device("cuda")
-    elif torch.backends.mps.is_available():
-        device = torch.device("mps")
-    else:
-        device = torch.device("cpu")
-    logger.info(f"Device selecionado: {device}")
+        return torch.device("cuda")
+    if torch.backends.mps.is_available():
+        return torch.device("mps")
+    return torch.device("cpu")
 
-    # Datasets
+
+def _verify_mps(model: nn.Module, input_dim: int, device: torch.device) -> torch.device:
+    """Verifica compatibilidade MPS; faz fallback para CPU se necessário."""
+    if device.type != "mps":
+        return device
+    try:
+        probe = torch.randn(2, input_dim, device=device)
+        model.to(device)
+        model(probe)
+        logger.info("MPS: forward pass de verificação OK.")
+        return device
+    except RuntimeError as exc:
+        logger.warning(f"MPS indisponível ({exc}). Fallback para CPU.")
+        model.cpu()
+        return torch.device("cpu")
+
+
+def _evaluate_on_test(
+    trainer: "Trainer",
+    model: nn.Module,
+    checkpoint_path: Path,
+    test_loader: "DataLoader[Any]",  # type: ignore[type-arg]
+    best_epoch: int,
+    device: torch.device,
+) -> None:
+    """Carrega melhor checkpoint e avalia no test set."""
+    logger.info("=== Avaliação no Test Set (melhor checkpoint) ===")
+    ckpt = Trainer.load_checkpoint(checkpoint_path, device=device)
+    model.load_state_dict(ckpt["model_state_dict"])
+    model.eval()
+
+    test_metrics = trainer._val_epoch(test_loader, epoch=best_epoch, train_loss=0.0)
+    trainer._log_confusion_matrix(test_loader, label="test (final)")
+    logger.info(
+        f"TEST FINAL | "
+        f"loss={test_metrics.val_loss:.4f} | "
+        f"acc={test_metrics.val_acc:.3f} | "
+        f"f1_macro={test_metrics.val_f1_macro:.4f} | "
+        f"f1[SELL={test_metrics.val_f1_sell:.3f} "
+        f"NOT-SELL={test_metrics.val_f1_not_sell:.3f}]"
+    )
+
+
+def _run_single_split(
+    cfg: dict[str, Any],
+    device: torch.device,
+    checkpoint_path: Path,
+) -> None:
+    """Treinamento com split cronológico único (modo legado 60/20/20)."""
     train_ds, val_ds, test_ds, scaler = create_datasets(config=cfg)
 
-    # Class weights computados exclusivamente do train (anti-leakage)
     class_weights = compute_class_weights(
         y_train=train_ds.y.numpy(),
         num_classes=cfg["model"]["num_classes"],
@@ -619,67 +649,243 @@ def main() -> None:
     val_loader = DataLoader(val_ds, batch_size=batch_size, shuffle=False)
     test_loader = DataLoader(test_ds, batch_size=batch_size, shuffle=False)
 
-    # Modelo
     model = build_mlp_from_config(cfg, input_dim=train_ds.input_dim)
-
-    # Verificação de compatibilidade MPS (some ops podem não ser suportadas)
-    if device.type == "mps":
-        try:
-            _probe = torch.randn(2, train_ds.input_dim, device=device)
-            model.to(device)
-            _ = model(_probe)
-            logger.info("MPS: forward pass de verificação OK.")
-        except RuntimeError as exc:
-            logger.warning(
-                f"MPS indisponível para este modelo ({exc}). Fallback para CPU."
-            )
-            device = torch.device("cpu")
-            model = model.cpu()
-    else:
-        model = model.to(device)
+    device = _verify_mps(model, train_ds.input_dim, device)
+    model = model.to(device)
 
     n_params = sum(p.numel() for p in model.parameters())
     logger.info(
-        f"Modelo pronto: {n_params:,} parâmetros | "
-        f"input_dim={train_ds.input_dim} | "
+        f"Modelo pronto: {n_params:,} parâmetros | input_dim={train_ds.input_dim} | "
         f"train={len(train_ds)} | val={len(val_ds)} | test={len(test_ds)}"
     )
 
-    # Treinamento
     trainer = Trainer(
-        model=model,
-        config=cfg,
-        device=device,
-        class_weights=class_weights,
-        scaler=scaler,
+        model=model, config=cfg, device=device,
+        class_weights=class_weights, scaler=scaler,
     )
-
-    checkpoint_path = Path("data/models/mlp_v1.pt")
     best_metrics = trainer.fit(train_loader, val_loader, checkpoint_path)
+    _evaluate_on_test(trainer, model, checkpoint_path, test_loader, best_metrics.epoch, device)
+    logger.info(f"Artefato salvo em: {checkpoint_path.resolve()}")
 
-    # Avaliação final no test set com o melhor checkpoint
-    logger.info("=== Avaliação no Test Set (melhor checkpoint) ===")
-    checkpoint = Trainer.load_checkpoint(checkpoint_path, device=device)
-    model.load_state_dict(checkpoint["model_state_dict"])
-    model.eval()
 
-    test_metrics = trainer._val_epoch(
-        test_loader,
-        epoch=best_metrics.epoch,
-        train_loss=0.0,
+def _run_walk_forward(
+    cfg: dict[str, Any],
+    device: torch.device,
+    checkpoint_path: Path,
+) -> None:
+    """Treinamento com walk-forward cross-validation (N folds expansivos).
+
+    Cada fold treina um modelo do zero sobre um conjunto de dados diferente,
+    garantindo que o modelo veja múltiplos regimes de mercado durante a
+    validação. O checkpoint final é o da fold com maior val_f1_macro.
+    O test set (últimos test_ratio% dos dados) é fixo e nunca visto durante CV.
+    """
+    train_cfg = cfg["training"]
+    model_cfg = cfg["model"]
+    batch_size: int = train_cfg["batch_size"]
+    n_splits: int = train_cfg["walk_forward_n_splits"]
+    min_train: int = train_cfg["walk_forward_min_train"]
+    test_ratio: float = train_cfg["test_ratio"]
+    window_size: int = model_cfg["window_size"]
+    feature_cols = MODEL_FEATURE_COLS
+
+    # Carrega o parquet e computa índices válidos uma única vez
+    df = load_features_parquet()
+    valid_indices = compute_valid_indices(df, window_size, feature_cols)
+
+    test_indices, folds = compute_walk_forward_splits(
+        valid_indices, n_splits, test_ratio, min_train
     )
-    trainer._log_confusion_matrix(test_loader, label="test (final)")
+
+    # Constrói o test set uma única vez (independente dos folds)
+    X_test_raw, y_test_raw = build_windows(df, test_indices, window_size, feature_cols)
+    y_test_remapped = remap_labels(y_test_raw)
+
+    best_fold_f1: float = -1.0
+    best_fold_ckpt: Path | None = None
+    best_fold_scaler = None
+
+    logger.info(f"=== Walk-Forward CV: {len(folds)} folds | test={len(test_indices)} ===")
+
+    for fold_idx, (train_idx, val_idx) in enumerate(folds):
+        logger.info(
+            f"\n--- Fold {fold_idx + 1}/{len(folds)} | "
+            f"train={len(train_idx)} | val={len(val_idx)} ---"
+        )
+
+        # Constrói arrays para esta fold
+        X_train_raw, y_train_raw = build_windows(df, train_idx, window_size, feature_cols)
+        X_val_raw, y_val_raw = build_windows(df, val_idx, window_size, feature_cols)
+
+        # Scaler fitado apenas no treino desta fold (anti-leakage)
+        fold_scaler = fit_scaler(X_train_raw)
+        X_train = fold_scaler.transform(X_train_raw)
+        X_val = fold_scaler.transform(X_val_raw)
+
+        y_train = remap_labels(y_train_raw)
+        y_val = remap_labels(y_val_raw)
+
+        train_ds = AgRo3Dataset(X_train, y_train)
+        val_ds = AgRo3Dataset(X_val, y_val)
+
+        fold_class_weights = compute_class_weights(
+            y_train=train_ds.y.numpy(),
+            num_classes=model_cfg["num_classes"],
+            device=device,
+        )
+
+        fold_model = build_mlp_from_config(cfg, input_dim=train_ds.input_dim)
+        fold_device = _verify_mps(fold_model, train_ds.input_dim, device)
+        fold_model = fold_model.to(fold_device)
+
+        fold_ckpt = checkpoint_path.parent / f"mlp_fold{fold_idx}.pt"
+        fold_trainer = Trainer(
+            model=fold_model, config=cfg, device=fold_device,
+            class_weights=fold_class_weights, scaler=fold_scaler,
+        )
+
+        fold_train_loader = DataLoader(train_ds, batch_size=batch_size, shuffle=True)
+        fold_val_loader = DataLoader(val_ds, batch_size=batch_size, shuffle=False)
+
+        best_metrics = fold_trainer.fit(fold_train_loader, fold_val_loader, fold_ckpt)
+        logger.info(
+            f"Fold {fold_idx + 1} concluída: "
+            f"val_f1_macro={best_metrics.val_f1_macro:.4f} (época {best_metrics.epoch})"
+        )
+
+        if best_metrics.val_f1_macro > best_fold_f1:
+            best_fold_f1 = best_metrics.val_f1_macro
+            best_fold_ckpt = fold_ckpt
+            best_fold_scaler = fold_scaler
+
+    assert best_fold_ckpt is not None and best_fold_scaler is not None
 
     logger.info(
-        f"TEST FINAL | "
-        f"loss={test_metrics.val_loss:.4f} | "
-        f"acc={test_metrics.val_acc:.3f} | "
-        f"f1_macro={test_metrics.val_f1_macro:.4f} | "
-        f"f1[SELL={test_metrics.val_f1_sell:.3f} "
-        f"HOLD={test_metrics.val_f1_hold:.3f} "
-        f"BUY={test_metrics.val_f1_buy:.3f}]"
+        f"\n=== Walk-Forward concluído | Melhor fold por val_f1: {best_fold_ckpt.name} "
+        f"| val_f1_macro={best_fold_f1:.4f} ==="
     )
-    logger.info(f"Artefato salvo em: {checkpoint_path.resolve()}")
+
+    # -----------------------------------------------------------------------
+    # FINAL REFIT — retreina sobre TODO o pré-test com o scaler mais amplo.
+    #
+    # Problema da seleção pela "melhor fold":
+    #   A fold com maior val_f1 tende a ser a que valida num regime parecido
+    #   com o treino — não a que mais generaliza para o futuro. No nosso caso,
+    #   a Fold 1 (treino 2006-2009, val 2009-2012) ganhou, mas seu scaler é
+    #   fitado em apenas ~200 amostras do período de CDI baixo histórico,
+    #   incompatível com o test set de 2021-2025 (CDI 13-14%).
+    #
+    # Solução: após o CV (que serve para diagnóstico de regimes), retreinar um
+    # modelo do zero sobre os primeiros 80% do pré-test e validar sobre os
+    # últimos 20% (período mais recente, temporal proxy do test). O scaler
+    # cobre ~568 amostras (2006-2019), normalizando CDI e preços em range mais
+    # representativo para inferência futura.
+    # -----------------------------------------------------------------------
+    import shutil
+
+    n_pre_test = len(valid_indices) - len(test_indices)
+    pre_test_indices = valid_indices[:n_pre_test]
+
+    n_rf_val = max(50, int(n_pre_test * 0.20))   # ≥ 50 amostras, ≈ 20%
+    rf_train_idx = pre_test_indices[:-n_rf_val]
+    rf_val_idx   = pre_test_indices[-n_rf_val:]
+
+    logger.info(
+        f"\n=== FINAL REFIT | train={len(rf_train_idx)} | val={len(rf_val_idx)} "
+        f"(scaler fitado em {len(rf_train_idx)} amostras — cobre 2006→~2019) ==="
+    )
+
+    X_rf_train_raw, y_rf_train_raw = build_windows(df, rf_train_idx, window_size, feature_cols)
+    X_rf_val_raw,   y_rf_val_raw   = build_windows(df, rf_val_idx,   window_size, feature_cols)
+
+    rf_scaler    = fit_scaler(X_rf_train_raw)
+    X_rf_train   = rf_scaler.transform(X_rf_train_raw)
+    X_rf_val     = rf_scaler.transform(X_rf_val_raw)
+
+    y_rf_train = remap_labels(y_rf_train_raw)
+    y_rf_val   = remap_labels(y_rf_val_raw)
+
+    rf_train_ds = AgRo3Dataset(X_rf_train, y_rf_train)
+    rf_val_ds   = AgRo3Dataset(X_rf_val,   y_rf_val)
+
+    rf_class_weights = compute_class_weights(
+        y_train=rf_train_ds.y.numpy(),
+        num_classes=model_cfg["num_classes"],
+        device=device,
+    )
+
+    rf_model  = build_mlp_from_config(cfg, input_dim=rf_train_ds.input_dim)
+    rf_device = _verify_mps(rf_model, rf_train_ds.input_dim, device)
+    rf_model  = rf_model.to(rf_device)
+
+    rf_ckpt = checkpoint_path.parent / "mlp_final_refit.pt"
+    rf_trainer = Trainer(
+        model=rf_model, config=cfg, device=rf_device,
+        class_weights=rf_class_weights, scaler=rf_scaler,
+    )
+
+    rf_train_loader = DataLoader(rf_train_ds, batch_size=batch_size, shuffle=True)
+    rf_val_loader   = DataLoader(rf_val_ds,   batch_size=batch_size, shuffle=False)
+
+    rf_best = rf_trainer.fit(rf_train_loader, rf_val_loader, rf_ckpt)
+    logger.info(
+        f"Final Refit concluído: val_f1_macro={rf_best.val_f1_macro:.4f} "
+        f"(época {rf_best.epoch})"
+    )
+
+    # O artefato de produção é o checkpoint do refit, não da melhor fold de CV
+    shutil.copy2(rf_ckpt, checkpoint_path)
+    logger.info(f"Final Refit checkpoint copiado para: {checkpoint_path}")
+
+    # Avalia no test com o scaler do refit (normalizações do período mais longo)
+    X_test   = rf_scaler.transform(X_test_raw)
+    test_ds  = AgRo3Dataset(X_test, y_test_remapped)
+    test_loader = DataLoader(test_ds, batch_size=batch_size, shuffle=False)
+
+    ckpt_rf    = Trainer.load_checkpoint(checkpoint_path, device=device)
+    eval_model = build_mlp_from_config(cfg, input_dim=test_ds.input_dim)
+    eval_model.load_state_dict(ckpt_rf["model_state_dict"])
+    eval_model = eval_model.to(device)
+
+    dummy_weights = torch.ones(model_cfg["num_classes"], device=device)
+    eval_trainer  = Trainer(
+        model=eval_model, config=cfg, device=device,
+        class_weights=dummy_weights, scaler=rf_scaler,
+    )
+    _evaluate_on_test(
+        eval_trainer, eval_model, checkpoint_path,
+        test_loader, ckpt_rf["best_epoch"], device,
+    )
+    logger.info(f"Artefato final salvo em: {checkpoint_path.resolve()}")
+
+
+def main() -> None:
+    """Entry point: uv run python -m src.models.trainer
+
+    Detecta automaticamente o modo de treinamento via model_config.yaml:
+    - walk_forward_n_splits > 0 → Walk-Forward CV (recomendado)
+    - walk_forward_n_splits = 0 → Split cronológico único (modo legado)
+    """
+    cfg = load_model_config()
+
+    seed: int = cfg["training"]["seed"]
+    torch.manual_seed(seed)
+    np.random.seed(seed)
+    random.seed(seed)
+    logger.info(f"Seeds definidos: {seed}")
+
+    device = _select_device()
+    logger.info(f"Device selecionado: {device}")
+
+    checkpoint_path = Path("data/models/mlp_v1.pt")
+    n_wf_splits: int = cfg["training"].get("walk_forward_n_splits", 0)
+
+    if n_wf_splits > 0:
+        logger.info(f"Modo: Walk-Forward CV ({n_wf_splits} folds)")
+        _run_walk_forward(cfg, device, checkpoint_path)
+    else:
+        logger.info("Modo: Split cronológico único (legado)")
+        _run_single_split(cfg, device, checkpoint_path)
 
 
 if __name__ == "__main__":

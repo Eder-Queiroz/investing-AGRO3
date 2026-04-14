@@ -181,15 +181,45 @@ class FundamentalsFetcher:
     ) -> tuple[pd.DataFrame, pd.DataFrame]:
         """Busca DRE e Balanço Patrimonial trimestrais via Status Invest.
 
+        Se o DRE trimestral não contiver ROE (caso documentado para AGRO3 onde
+        o endpoint type=1 retorna null), busca o DRE anual (type=0) e propaga
+        o valor anual para os trimestres do respectivo ano via forward-fill.
+
         Args:
             start_year: Ano inicial.
             end_year: Ano final.
 
         Returns:
             Tupla (dre_df, bp_df) com DatetimeIndex de datas de fim de trimestre.
+            dre_df pode ter ROE preenchido a partir dos dados anuais se necessário.
         """
         dre = self._client.fetch_dre(self.CODE, start_year, end_year)
         bp = self._client.fetch_balance(self.CODE, start_year, end_year)
+
+        # ROE do endpoint trimestral da AGRO3 é parcialmente nulo e inconsistente
+        # (valores de escala questionável para 2011-2015, NaN de 2016+).
+        # Sempre sobrescreve com o DRE anual (type=0), que fornece ROE correto
+        # em % para todos os anos disponíveis.
+        roe_col = _DRE_FIELDS["roe"]  # "ROE"
+        logger.info("Buscando ROE anual via endpoint type=0 (sobrescreve trimestral)")
+        dre_annual = self._client.fetch_dre_annual(self.CODE, start_year, end_year)
+        if roe_col in dre_annual.columns:
+            # Propaga ROE anual para datas trimestrais via forward-fill:
+            # cada trimestre recebe o ROE do último 31/dez <= data do trimestre.
+            annual_roe = dre_annual[roe_col].dropna()
+            combined_idx = dre.index.union(annual_roe.index).sort_values()
+            roe_quarterly = (
+                annual_roe.reindex(combined_idx).ffill().reindex(dre.index)
+            )
+            dre[roe_col] = roe_quarterly.values
+            non_null = int(dre[roe_col].notna().sum())
+            logger.info(
+                f"ROE anual mapeado para {non_null}/{len(dre)} trimestres"
+            )
+        else:
+            logger.warning(
+                f"Campo '{roe_col}' ausente no DRE anual — ROE permanecerá NaN"
+            )
 
         logger.debug(
             f"Demonstrativos obtidos: DRE={len(dre)} trimestres "

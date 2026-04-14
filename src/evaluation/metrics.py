@@ -74,7 +74,7 @@ logger: logging.Logger = get_logger(__name__)
 # Data Structures
 # ---------------------------------------------------------------------------
 
-CLASS_NAMES: dict[int, str] = {0: "SELL", 1: "HOLD", 2: "BUY"}
+CLASS_NAMES: dict[int, str] = {0: "SELL", 1: "NOT-SELL"}
 
 
 @dataclasses.dataclass(frozen=True)
@@ -82,7 +82,7 @@ class ClassMetrics:
     """Métricas de precisão/recall/F1 para uma única classe.
 
     Atributos:
-        class_idx: Índice da classe (0=SELL, 1=HOLD, 2=BUY).
+        class_idx: Índice da classe (0=SELL, 1=NOT-SELL).
         class_name: Nome legível da classe.
         precision: Fração de predições desta classe que estão corretas.
         recall: Fração de instâncias reais desta classe que foram detectadas.
@@ -143,8 +143,8 @@ class EvaluationReport:
         n_samples: Número total de amostras avaliadas.
 
         f1_macro: F1-Score macro-averaged — métrica primária do CLAUDE.md.
-        precision_buy: Precision da classe BUY (2) — custo de falso positivo.
-        recall_sell: Recall da classe SELL (0) — custo de falso negativo.
+        precision_not_sell: Precision da classe NOT-SELL (1) — quando o modelo diz "não sair", acerta?
+        recall_sell: Recall da classe SELL (0) — quantos SELLs reais o modelo captura?
 
         accuracy: Acurácia global (enganosa com classes desbalanceadas).
         mcc: Matthews Correlation Coefficient — robusto a desbalanceamento.
@@ -155,7 +155,7 @@ class EvaluationReport:
         confusion_matrix: Matriz (3×3) — linhas=real, colunas=predito.
 
         ci_f1_macro: IC 95% BCa para F1-Macro.
-        ci_precision_buy: IC 95% BCa para Precision(BUY).
+        ci_precision_not_sell: IC 95% BCa para Precision(NOT-SELL).
         ci_recall_sell: IC 95% BCa para Recall(SELL).
 
         p_value_vs_baseline: p-value do teste de permutação (H₀: modelo = chance).
@@ -165,9 +165,9 @@ class EvaluationReport:
 
     split_name: str
     n_samples: int
-    # --- CLAUDE.md required ---
+    # --- Primary metrics ---
     f1_macro: float
-    precision_buy: float
+    precision_not_sell: float
     recall_sell: float
     # --- Supporting ---
     accuracy: float
@@ -176,10 +176,10 @@ class EvaluationReport:
     majority_baseline_f1: float
     # --- Breakdown ---
     per_class: dict[int, ClassMetrics]
-    confusion_matrix: np.ndarray  # shape (3, 3)
+    confusion_matrix: np.ndarray  # shape (2, 2)
     # --- Bootstrap CIs (95%) ---
     ci_f1_macro: BootstrapCI
-    ci_precision_buy: BootstrapCI
+    ci_precision_not_sell: BootstrapCI
     ci_recall_sell: BootstrapCI
     # --- Significance ---
     p_value_vs_baseline: float
@@ -419,19 +419,19 @@ def compute_metrics(
     if y_true.ndim != 1:
         raise ValueError(f"y_true deve ser 1D. Shape recebido: {y_true.shape}")
 
-    valid_labels = {0, 1, 2}
+    valid_labels = {0, 1}
     invalid_true = set(np.unique(y_true)) - valid_labels
     invalid_pred = set(np.unique(y_pred)) - valid_labels
     if invalid_true:
-        raise ValueError(f"y_true contém valores fora de {{0,1,2}}: {invalid_true}")
+        raise ValueError(f"y_true contém valores fora de {{0,1}}: {invalid_true}")
     if invalid_pred:
-        raise ValueError(f"y_pred contém valores fora de {{0,1,2}}: {invalid_pred}")
+        raise ValueError(f"y_pred contém valores fora de {{0,1}}: {invalid_pred}")
 
     if y_proba is not None:
         y_proba_arr = np.asarray(y_proba)
-        if y_proba_arr.shape != (len(y_true), 3):
+        if y_proba_arr.shape != (len(y_true), 2):
             raise ValueError(
-                f"y_proba deve ter shape (N, 3). Recebido: {y_proba_arr.shape}"
+                f"y_proba deve ter shape (N, 2). Recebido: {y_proba_arr.shape}"
             )
         logger.debug(
             "y_proba recebido mas ignorado nesta fase — calibração reservada para Fase 7."
@@ -447,16 +447,16 @@ def compute_metrics(
     cohen_kappa = float(cohen_kappa_score(y_true, y_pred))
     majority_baseline_f1 = compute_majority_baseline_f1(y_true)
 
-    # Métricas requeridas por CLAUDE.md
-    precision_buy = float(
-        precision_score(y_true, y_pred, labels=[2], average=None, zero_division=0)[0]
+    # Métricas por classe binária
+    precision_not_sell = float(
+        precision_score(y_true, y_pred, labels=[1], average=None, zero_division=0)[0]
     )
     recall_sell = float(
         recall_score(y_true, y_pred, labels=[0], average=None, zero_division=0)[0]
     )
 
-    # --- 2. Confusion matrix — labels explícito para fixar shape (3×3) ---
-    cm = confusion_matrix(y_true, y_pred, labels=[0, 1, 2])
+    # --- 2. Confusion matrix — labels explícito para fixar shape (2×2) ---
+    cm = confusion_matrix(y_true, y_pred, labels=[0, 1])
 
     # --- 3. Métricas por classe ---
     per_class: dict[int, ClassMetrics] = {
@@ -468,9 +468,9 @@ def compute_metrics(
     def _f1_macro_fn(yt: np.ndarray, yp: np.ndarray) -> float:
         return float(f1_score(yt, yp, average="macro", zero_division=0))
 
-    def _precision_buy_fn(yt: np.ndarray, yp: np.ndarray) -> float:
+    def _precision_not_sell_fn(yt: np.ndarray, yp: np.ndarray) -> float:
         return float(
-            precision_score(yt, yp, labels=[2], average=None, zero_division=0)[0]
+            precision_score(yt, yp, labels=[1], average=None, zero_division=0)[0]
         )
 
     def _recall_sell_fn(yt: np.ndarray, yp: np.ndarray) -> float:
@@ -480,8 +480,8 @@ def compute_metrics(
 
     logger.info("Computando bootstrap CIs (BCa, N_bootstrap=%d)...", n_bootstrap)
     ci_f1_macro = compute_bootstrap_ci(y_true, y_pred, _f1_macro_fn, n_bootstrap)
-    ci_precision_buy = compute_bootstrap_ci(
-        y_true, y_pred, _precision_buy_fn, n_bootstrap
+    ci_precision_not_sell = compute_bootstrap_ci(
+        y_true, y_pred, _precision_not_sell_fn, n_bootstrap
     )
     ci_recall_sell = compute_bootstrap_ci(y_true, y_pred, _recall_sell_fn, n_bootstrap)
 
@@ -496,7 +496,7 @@ def compute_metrics(
         split_name=split_name,
         n_samples=n_samples,
         f1_macro=f1_macro,
-        precision_buy=precision_buy,
+        precision_not_sell=precision_not_sell,
         recall_sell=recall_sell,
         accuracy=accuracy,
         mcc=mcc,
@@ -505,7 +505,7 @@ def compute_metrics(
         per_class=per_class,
         confusion_matrix=cm,
         ci_f1_macro=ci_f1_macro,
-        ci_precision_buy=ci_precision_buy,
+        ci_precision_not_sell=ci_precision_not_sell,
         ci_recall_sell=ci_recall_sell,
         p_value_vs_baseline=p_value,
         is_significant=is_significant,
@@ -693,24 +693,24 @@ def print_report(report: EvaluationReport) -> None:
     print(f"  EVALUATION REPORT: {split_upper}  (N={report.n_samples} samples)")
     print(sep)
 
-    # --- CLAUDE.md required metrics ---
+    # --- Primary metrics ---
     print()
-    print("  CLAUDE.md REQUIRED METRICS")
-    print(f"  {thin[:28]}")
+    print("  PRIMARY METRICS")
+    print(f"  {thin[:16]}")
 
     ci = report.ci_f1_macro
     print(
-        f"  F1-Score Macro    : {report.f1_macro:>7.4f}  "
+        f"  F1-Score Macro      : {report.f1_macro:>7.4f}  "
         f"[95% CI: {ci.lower:.4f} – {ci.upper:.4f}]"
     )
-    ci = report.ci_precision_buy
+    ci = report.ci_precision_not_sell
     print(
-        f"  Precision (BUY)   : {report.precision_buy:>7.4f}  "
+        f"  Precision (NOT-SELL): {report.precision_not_sell:>7.4f}  "
         f"[95% CI: {ci.lower:.4f} – {ci.upper:.4f}]"
     )
     ci = report.ci_recall_sell
     print(
-        f"  Recall    (SELL)  : {report.recall_sell:>7.4f}  "
+        f"  Recall    (SELL)    : {report.recall_sell:>7.4f}  "
         f"[95% CI: {ci.lower:.4f} – {ci.upper:.4f}]"
     )
 
@@ -738,12 +738,12 @@ def print_report(report: EvaluationReport) -> None:
     print()
     print("  PER-CLASS BREAKDOWN")
     print(f"  {thin[:19]}")
-    print(f"  {'Class':<10} {'Prec':>6}  {'Rec':>6}  {'F1':>6}  {'Support':>7}")
-    print(f"  {'-'*10} {'-'*6}  {'-'*6}  {'-'*6}  {'-'*7}")
-    for idx in [0, 1, 2]:
+    print(f"  {'Class':<13} {'Prec':>6}  {'Rec':>6}  {'F1':>6}  {'Support':>7}")
+    print(f"  {'-'*13} {'-'*6}  {'-'*6}  {'-'*6}  {'-'*7}")
+    for idx in [0, 1]:
         cm_cls = report.per_class[idx]
         print(
-            f"  {cm_cls.class_name+f' ({idx})':<10} "
+            f"  {cm_cls.class_name+f' ({idx})':<13} "
             f"{cm_cls.precision:>6.3f}  "
             f"{cm_cls.recall:>6.3f}  "
             f"{cm_cls.f1:>6.3f}  "
@@ -754,11 +754,11 @@ def print_report(report: EvaluationReport) -> None:
     print()
     print("  CONFUSION MATRIX  (rows=true, cols=pred)")
     print(f"  {thin[:40]}")
-    print(f"  {'':8}  {'SELL':>6}  {'HOLD':>6}  {'BUY':>6}")
-    class_labels = ["SELL", "HOLD", "BUY"]
+    print(f"  {'':11}  {'SELL':>6}  {'NOT-SELL':>8}")
+    class_labels = ["SELL", "NOT-SELL"]
     for i, label in enumerate(class_labels):
         row = report.confusion_matrix[i]
-        print(f"  {label:<8}  {row[0]:>6d}  {row[1]:>6d}  {row[2]:>6d}")
+        print(f"  {label:<11}  {row[0]:>6d}  {row[1]:>8d}")
 
     # --- Training context (omitido se checkpoint_meta is None) ---
     if report.checkpoint_meta is not None:

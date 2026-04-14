@@ -103,10 +103,8 @@ MODEL_FEATURE_COLS: list[str] = [
     "selic_real",
 ]
 
-# Label remapping: {-1 → 0, 0 → 1, 1 → 2}
-# SELL=0, HOLD=1, BUY=2
-# Reversível: original = remapped - 1
-_LABEL_OFFSET: int = 1
+# Label remapping binário: SELL=-1 → 0, NOT-SELL={0,1} → 1
+# Reformulação: "devo sair agora?" — SELL(0) vs. NOT-SELL(1)
 
 _DEFAULT_PARQUET_PATH: Path = _PROJECT_ROOT / "data" / "processed" / "features_weekly.parquet"
 
@@ -277,6 +275,79 @@ def split_indices_chronological(
     return train_idx, val_idx, test_idx
 
 
+def compute_walk_forward_splits(
+    valid_indices: np.ndarray,
+    n_splits: int,
+    test_ratio: float,
+    min_train_size: int = 200,
+) -> tuple[np.ndarray, list[tuple[np.ndarray, np.ndarray]]]:
+    """Divide valid_indices em test fixo + N folds de walk-forward com janela expansiva.
+
+    O test set é o final `test_ratio` dos índices válidos e é fixo — nunca
+    visto durante a validação cruzada. O restante (pre-test) é dividido em
+    `n_splits` folds onde o treino expande a cada fold.
+
+    Exemplo com n_splits=4, n_pre_test=709, min_train=200:
+        val_size = (709 - 200) // 4 = 127
+        Fold 0: train[0:327],  val[327:454]   ← regime 2008–2012
+        Fold 1: train[0:454],  val[454:581]   ← regime 2012–2015
+        Fold 2: train[0:581],  val[581:708]   ← regime 2015–2018
+        Fold 3: train[0:708],  val[708:709]   → apenas 1 sample, descartada
+
+    Args:
+        valid_indices: Array de índices válidos em ordem crescente.
+        n_splits: Número de folds de walk-forward desejados.
+        test_ratio: Proporção do conjunto de teste fixo (ex: 0.20).
+        min_train_size: Tamanho mínimo do treino na primeira fold.
+
+    Returns:
+        Tupla (test_indices, folds):
+            - test_indices: Array np.intp com os índices de teste fixos.
+            - folds: Lista de (train_indices, val_indices) por fold. Folds com
+              val vazio (< 10 amostras) são descartados silenciosamente.
+
+    Raises:
+        ValueError: Se não houver amostras suficientes para ao menos 2 folds.
+    """
+    n = len(valid_indices)
+    n_test = int(n * test_ratio)
+    test_indices = valid_indices[n - n_test:]
+    pre_test = valid_indices[: n - n_test]
+    n_pre_test = len(pre_test)
+
+    val_size = (n_pre_test - min_train_size) // n_splits
+    if val_size <= 0:
+        raise ValueError(
+            f"Amostras insuficientes para {n_splits} folds. "
+            f"n_pre_test={n_pre_test}, min_train_size={min_train_size}. "
+            f"Reduza n_splits ou min_train_size."
+        )
+
+    folds: list[tuple[np.ndarray, np.ndarray]] = []
+    for i in range(n_splits):
+        val_end = n_pre_test - (n_splits - 1 - i) * val_size
+        val_start = val_end - val_size
+        train_idx = pre_test[:val_start]
+        val_idx = pre_test[val_start:val_end]
+        if len(train_idx) >= min_train_size and len(val_idx) >= 10:
+            folds.append((train_idx, val_idx))
+
+    if len(folds) < 2:
+        raise ValueError(
+            f"Apenas {len(folds)} fold(s) válida(s) gerada(s). "
+            f"Mínimo necessário: 2. Ajuste n_splits ou min_train_size."
+        )
+
+    logger.info(
+        f"Walk-forward: {n_test} amostras de teste fixo | "
+        f"{len(folds)} folds | val_size≈{val_size} por fold"
+    )
+    for i, (tr, va) in enumerate(folds):
+        logger.info(f"  Fold {i}: train={len(tr)}, val={len(va)}")
+
+    return test_indices, folds
+
+
 def build_windows(
     df: pd.DataFrame,
     indices: np.ndarray,
@@ -366,20 +437,18 @@ def fit_scaler(X_train: np.ndarray) -> StandardScaler:
 
 
 def remap_labels(y: np.ndarray) -> np.ndarray:
-    """Remapeia labels {-1, 0, 1} para {0, 1, 2} para CrossEntropyLoss do PyTorch.
+    """Remapeia labels {-1, 0, 1} para binário {0, 1} para CrossEntropyLoss do PyTorch.
 
-    Mapeamento:
-        SELL  : -1 → 0
-        HOLD  :  0 → 1
-        BUY   :  1 → 2
-
-    Reversível: original = remapped - 1
+    Reformulação binária: "devo sair agora?"
+        SELL    : -1 → 0   (subperformou o CDI em > 5pp)
+        NOT-SELL :  0 → 1  (HOLD — dentro da banda CDI ±5pp)
+        NOT-SELL :  1 → 1  (BUY — superperformou o CDI em > 5pp)
 
     Args:
         y: Array com valores em {-1, 0, 1}, qualquer dtype inteiro.
 
     Returns:
-        Array dtype np.int64 com valores em {0, 1, 2}.
+        Array dtype np.int64 com valores em {0, 1}.
 
     Raises:
         ValueError: Se y contiver valores fora de {-1, 0, 1}.
@@ -391,10 +460,11 @@ def remap_labels(y: np.ndarray) -> np.ndarray:
             f"Encontrado: {unique_vals}"
         )
 
-    y_remapped: np.ndarray = (y.astype(np.int64)) + _LABEL_OFFSET
+    # SELL (-1) → 0; NOT-SELL (0 ou 1) → 1
+    y_remapped: np.ndarray = np.where(y == -1, 0, 1).astype(np.int64)
 
     unique_out = set(int(v) for v in np.unique(y_remapped))
-    assert unique_out.issubset({0, 1, 2}), (
+    assert unique_out.issubset({0, 1}), (
         f"[remap_labels] Output inválido após remapeamento: {unique_out}"
     )
 
@@ -466,7 +536,7 @@ def create_sliding_window_splits(
     for split_name, y_split in [("Train", y_train), ("Val", y_val), ("Test", y_test)]:
         unique, counts = np.unique(y_split, return_counts=True)
         dist = {int(k): int(v) for k, v in zip(unique, counts, strict=True)}
-        logger.info(f"Distribuição de classes [{split_name}]: {dist}  (0=SELL, 1=HOLD, 2=BUY)")
+        logger.info(f"Distribuição de classes [{split_name}]: {dist}  (0=SELL, 1=NOT-SELL)")
 
     return {
         "X_train": X_train,
@@ -516,7 +586,7 @@ if __name__ == "__main__":  # pragma: no cover
     print(f"  mean ∈ [{scaler.mean_.min():.4f}, {scaler.mean_.max():.4f}]")
     print(f"  std  ∈ [{scaler.scale_.min():.6f}, {scaler.scale_.max():.4f}]")
 
-    print("\nDistribuição de labels (0=SELL, 1=HOLD, 2=BUY):")
+    print("\nDistribuição de labels (0=SELL, 1=NOT-SELL):")
     for split in ("train", "val", "test"):
         y = result[f"y_{split}"]
         unique, counts = np.unique(y, return_counts=True)

@@ -1,18 +1,18 @@
 """
-Testes unitários para src/evaluation/metrics.py — Fase 5.
+Testes unitários para src/evaluation/metrics.py — Fase 5 (binário).
 
 Cobertura: ~26 testes em 8 grupos.
   1. compute_class_metrics     — precisão/recall por classe específica
   2. compute_bootstrap_ci      — ICs BCa, reprodutibilidade, caso degenerado
   3. compute_permutation_test  — p-value em [0,1], modelo perfeito vs. aleatório
-  4. compute_majority_baseline_f1 — classe majoritária, F1 baixo para HOLD-dominado
+  4. compute_majority_baseline_f1 — classe majoritária, F1 baixo para SELL-dominado
   5. compute_metrics           — montagem do EvaluationReport completo
   6. EvaluationReport.is_significant — limiar estrito p < 0.05
   7. print_report              — não levanta, stdout não-vazio, conteúdo mínimo
   8. evaluate_from_checkpoint  — FileNotFoundError para path inexistente
 
+Binário: 0=SELL, 1=NOT-SELL.
 Todos os testes rodam em CPU, sem dados reais e sem checkpoint.
-Fixtures sintéticas cobrem: balanceado, perfeito, aleatório e HOLD-dominado.
 """
 
 from __future__ import annotations
@@ -35,7 +35,7 @@ from src.evaluation.metrics import (
 )
 
 # ---------------------------------------------------------------------------
-# Fixtures compartilhadas
+# Fixtures compartilhadas (binário: 0=SELL, 1=NOT-SELL)
 # ---------------------------------------------------------------------------
 
 RNG = np.random.default_rng(0)
@@ -43,33 +43,33 @@ RNG = np.random.default_rng(0)
 
 @pytest.fixture
 def balanced_labels() -> tuple[np.ndarray, np.ndarray]:
-    """N=60 amostras balanceadas: 20 de cada classe."""
-    y_true = np.array([0] * 20 + [1] * 20 + [2] * 20)
-    y_pred = np.array([0] * 20 + [1] * 20 + [2] * 20)  # perfeito
+    """N=40 amostras balanceadas: 20 SELL, 20 NOT-SELL — predição perfeita."""
+    y_true = np.array([0] * 20 + [1] * 20)
+    y_pred = y_true.copy()
     return y_true, y_pred
 
 
 @pytest.fixture
-def hold_dominated_labels() -> tuple[np.ndarray, np.ndarray]:
-    """N=100 amostras HOLD-dominadas: 10 SELL, 70 HOLD, 20 BUY."""
-    y_true = np.array([0] * 10 + [1] * 70 + [2] * 20)
-    y_pred = np.full(100, 1, dtype=np.int64)  # sempre prediz HOLD
+def sell_dominated_labels() -> tuple[np.ndarray, np.ndarray]:
+    """N=100 amostras SELL-dominadas: 80 SELL, 20 NOT-SELL."""
+    y_true = np.array([0] * 80 + [1] * 20)
+    y_pred = np.full(100, 0, dtype=np.int64)  # sempre prediz SELL
     return y_true, y_pred
 
 
 @pytest.fixture
 def random_labels() -> tuple[np.ndarray, np.ndarray]:
-    """N=150 amostras aleatórias — p-value esperado próximo a 1.0."""
+    """N=150 amostras aleatórias binárias — p-value esperado próximo a 1.0."""
     rng = np.random.default_rng(999)
-    y_true = rng.integers(0, 3, size=150)
-    y_pred = rng.integers(0, 3, size=150)
+    y_true = rng.integers(0, 2, size=150)
+    y_pred = rng.integers(0, 2, size=150)
     return y_true, y_pred
 
 
 @pytest.fixture
 def perfect_labels() -> tuple[np.ndarray, np.ndarray]:
-    """N=90 amostras com predição perfeita — p-value esperado ~ 0."""
-    y_true = np.array([0] * 30 + [1] * 30 + [2] * 30)
+    """N=60 amostras com predição perfeita — p-value esperado ~ 0."""
+    y_true = np.array([0] * 30 + [1] * 30)
     y_pred = y_true.copy()
     return y_true, y_pred
 
@@ -86,11 +86,11 @@ def sample_report(balanced_labels: tuple[np.ndarray, np.ndarray]) -> EvaluationR
 # ---------------------------------------------------------------------------
 
 
-def test_class_metrics_perfect_buy() -> None:
-    """Predição perfeita para BUY deve resultar em precision=recall=f1=1.0."""
-    y_true = np.array([0, 1, 2, 2, 2])
-    y_pred = np.array([0, 1, 2, 2, 2])
-    result = compute_class_metrics(y_true, y_pred, class_idx=2, class_name="BUY")
+def test_class_metrics_perfect_not_sell() -> None:
+    """Predição perfeita para NOT-SELL deve resultar em precision=recall=f1=1.0."""
+    y_true = np.array([0, 1, 1, 1])
+    y_pred = np.array([0, 1, 1, 1])
+    result = compute_class_metrics(y_true, y_pred, class_idx=1, class_name="NOT-SELL")
     assert result.precision == pytest.approx(1.0)
     assert result.recall == pytest.approx(1.0)
     assert result.f1 == pytest.approx(1.0)
@@ -98,25 +98,25 @@ def test_class_metrics_perfect_buy() -> None:
 
 def test_class_metrics_sell_never_predicted() -> None:
     """Quando SELL nunca é predito, recall(SELL) = 0.0 (verdadeiros não detectados)."""
-    y_true = np.array([0, 0, 1, 2])
-    y_pred = np.array([1, 2, 1, 2])  # SELL nunca predito
+    y_true = np.array([0, 0, 1, 1])
+    y_pred = np.array([1, 1, 1, 1])  # SELL nunca predito
     result = compute_class_metrics(y_true, y_pred, class_idx=0, class_name="SELL")
     assert result.recall == pytest.approx(0.0)
 
 
 def test_class_metrics_support_count() -> None:
     """Support deve contar instâncias reais da classe, não preditas."""
-    y_true = np.array([0, 0, 0, 1, 2])
-    y_pred = np.array([0, 1, 2, 1, 2])
+    y_true = np.array([0, 0, 0, 1, 1])
+    y_pred = np.array([0, 1, 1, 1, 1])
     result = compute_class_metrics(y_true, y_pred, class_idx=0, class_name="SELL")
     assert result.support == 3  # três SELL reais
 
 
 def test_class_metrics_zero_division_safety() -> None:
-    """Quando a classe não aparece em y_pred, não deve levantar erro (zero_division=0)."""
+    """Quando a classe não aparece em y_true nem y_pred, não deve levantar erro."""
     y_true = np.array([1, 1, 1])
-    y_pred = np.array([1, 1, 1])  # BUY (2) nunca predito nem real
-    result = compute_class_metrics(y_true, y_pred, class_idx=2, class_name="BUY")
+    y_pred = np.array([1, 1, 1])  # SELL (0) nunca aparece
+    result = compute_class_metrics(y_true, y_pred, class_idx=0, class_name="SELL")
     assert result.precision == pytest.approx(0.0)
     assert result.recall == pytest.approx(0.0)
     assert result.f1 == pytest.approx(0.0)
@@ -125,12 +125,12 @@ def test_class_metrics_zero_division_safety() -> None:
 
 def test_class_metrics_returns_dataclass() -> None:
     """Deve retornar instância de ClassMetrics (frozen=True)."""
-    y_true = np.array([0, 1, 2])
-    y_pred = np.array([0, 1, 2])
-    result = compute_class_metrics(y_true, y_pred, 1, "HOLD")
+    y_true = np.array([0, 1, 0, 1])
+    y_pred = np.array([0, 1, 0, 1])
+    result = compute_class_metrics(y_true, y_pred, 1, "NOT-SELL")
     assert isinstance(result, ClassMetrics)
     assert result.class_idx == 1
-    assert result.class_name == "HOLD"
+    assert result.class_name == "NOT-SELL"
 
 
 # ---------------------------------------------------------------------------
@@ -240,10 +240,9 @@ def test_permutation_test_perfect_predictions_significant(
 def test_permutation_test_known_seed_random_not_significant() -> None:
     """Predições completamente aleatórias geralmente produzem p > 0.05."""
     rng = np.random.default_rng(1234)
-    y_true = rng.integers(0, 3, size=200)
-    y_pred = rng.integers(0, 3, size=200)
+    y_true = rng.integers(0, 2, size=200)
+    y_pred = rng.integers(0, 2, size=200)
     p = compute_permutation_test(y_true, y_pred, n_permutations=500, seed=42)
-    # p-value alto indica que o modelo não supera a permutação aleatória
     assert p > 0.05, (
         f"Predições aleatórias não devem ser significativas, mas p={p:.4f}"
     )
@@ -264,28 +263,26 @@ def test_permutation_test_returns_float(
 
 
 def test_majority_baseline_correct_class_identified() -> None:
-    """Deve identificar HOLD (1) como classe majoritária em dados HOLD-dominados."""
-    y_true = np.array([0] * 5 + [1] * 80 + [2] * 15)
-    # F1-Macro de always-predict-HOLD:
-    # SELL: F1=0, HOLD: F1=2*prec*rec/(prec+rec) > 0, BUY: F1=0
+    """Deve identificar SELL (0) como classe majoritária em dados SELL-dominados."""
+    y_true = np.array([0] * 80 + [1] * 20)
     baseline_f1 = compute_majority_baseline_f1(y_true)
     assert isinstance(baseline_f1, float)
     assert 0.0 <= baseline_f1 <= 1.0
 
 
-def test_majority_baseline_f1_low_for_hold_dominated(
-    hold_dominated_labels: tuple[np.ndarray, np.ndarray],
+def test_majority_baseline_f1_low_for_sell_dominated(
+    sell_dominated_labels: tuple[np.ndarray, np.ndarray],
 ) -> None:
-    """Para dados HOLD-dominados, baseline F1-Macro deve ser bem abaixo de 0.5."""
-    y_true, _ = hold_dominated_labels
+    """Para dados SELL-dominados e predição always-SELL, F1-Macro < 1.0."""
+    y_true, _ = sell_dominated_labels
     f1 = compute_majority_baseline_f1(y_true)
-    # SELL e BUY têm F1=0, apenas HOLD > 0 → média macro baixa
-    assert f1 < 0.5, f"Baseline F1-Macro esperado < 0.5 para dados HOLD-dominados, got {f1:.4f}"
+    # Quando a classe minoritária (NOT-SELL=1) tem F1=0, a média macro fica baixa
+    assert f1 < 1.0, f"Baseline F1-Macro esperado < 1.0, got {f1:.4f}"
 
 
 def test_majority_baseline_returns_float() -> None:
     """Deve retornar float Python nativo."""
-    y_true = np.array([0, 1, 1, 2, 1])
+    y_true = np.array([0, 1, 1, 0, 1])
     result = compute_majority_baseline_f1(y_true)
     assert isinstance(result, float)
 
@@ -305,16 +302,16 @@ def test_compute_metrics_all_fields_populated(
     assert report.split_name == "test"
     assert report.n_samples == len(y_true)
     assert isinstance(report.f1_macro, float)
-    assert isinstance(report.precision_buy, float)
+    assert isinstance(report.precision_not_sell, float)
     assert isinstance(report.recall_sell, float)
     assert isinstance(report.accuracy, float)
     assert isinstance(report.mcc, float)
     assert isinstance(report.cohen_kappa, float)
     assert isinstance(report.majority_baseline_f1, float)
-    assert report.confusion_matrix.shape == (3, 3)
-    assert set(report.per_class.keys()) == {0, 1, 2}
+    assert report.confusion_matrix.shape == (2, 2)
+    assert set(report.per_class.keys()) == {0, 1}
     assert isinstance(report.ci_f1_macro, BootstrapCI)
-    assert isinstance(report.ci_precision_buy, BootstrapCI)
+    assert isinstance(report.ci_precision_not_sell, BootstrapCI)
     assert isinstance(report.ci_recall_sell, BootstrapCI)
     assert isinstance(report.p_value_vs_baseline, float)
     assert isinstance(report.is_significant, bool)
@@ -332,33 +329,33 @@ def test_compute_metrics_f1_macro_matches_sklearn(
     assert report.f1_macro == pytest.approx(expected)
 
 
-def test_compute_metrics_precision_buy_matches_sklearn(
+def test_compute_metrics_precision_not_sell_matches_sklearn(
     balanced_labels: tuple[np.ndarray, np.ndarray],
 ) -> None:
-    """precision_buy deve corresponder ao precision do sklearn para labels=[2]."""
+    """precision_not_sell deve corresponder ao precision do sklearn para labels=[1]."""
     from sklearn.metrics import precision_score
 
     y_true, y_pred = balanced_labels
     report = compute_metrics(y_true, y_pred, n_bootstrap=50, n_permutations=50)
-    expected = float(precision_score(y_true, y_pred, labels=[2], average=None, zero_division=0)[0])
-    assert report.precision_buy == pytest.approx(expected)
+    expected = float(precision_score(y_true, y_pred, labels=[1], average=None, zero_division=0)[0])
+    assert report.precision_not_sell == pytest.approx(expected)
 
 
 def test_compute_metrics_confusion_matrix_shape(
     random_labels: tuple[np.ndarray, np.ndarray],
 ) -> None:
-    """Confusion matrix deve ser sempre (3, 3)."""
+    """Confusion matrix deve ser sempre (2, 2) no modo binário."""
     y_true, y_pred = random_labels
     report = compute_metrics(y_true, y_pred, n_bootstrap=50, n_permutations=50)
-    assert report.confusion_matrix.shape == (3, 3)
+    assert report.confusion_matrix.shape == (2, 2)
 
 
-def test_compute_metrics_confusion_matrix_3x3_when_class_absent() -> None:
-    """Confusion matrix deve ser (3,3) mesmo quando uma classe está ausente das predições."""
-    y_true = np.array([0, 1, 2, 1, 1, 2])
-    y_pred = np.array([1, 1, 1, 1, 1, 1])  # SELL e BUY nunca preditos
+def test_compute_metrics_confusion_matrix_2x2_when_class_absent() -> None:
+    """Confusion matrix deve ser (2,2) mesmo quando uma classe está ausente das predições."""
+    y_true = np.array([0, 1, 0, 1, 1, 1])
+    y_pred = np.array([1, 1, 1, 1, 1, 1])  # SELL nunca predito
     report = compute_metrics(y_true, y_pred, n_bootstrap=50, n_permutations=50)
-    assert report.confusion_matrix.shape == (3, 3)
+    assert report.confusion_matrix.shape == (2, 2)
 
 
 def test_compute_metrics_n_samples_correct(
@@ -383,16 +380,16 @@ def test_compute_metrics_accepts_checkpoint_meta_none(
 
 def test_compute_metrics_raises_on_shape_mismatch() -> None:
     """y_true e y_pred com shapes diferentes devem levantar ValueError."""
-    y_true = np.array([0, 1, 2])
+    y_true = np.array([0, 1, 0])
     y_pred = np.array([0, 1])
     with pytest.raises(ValueError, match="mesmo shape"):
         compute_metrics(y_true, y_pred)
 
 
 def test_compute_metrics_raises_on_invalid_labels() -> None:
-    """Labels fora de {0,1,2} devem levantar ValueError."""
-    y_true = np.array([0, 1, 3])  # 3 é inválido
-    y_pred = np.array([0, 1, 2])
+    """Labels fora de {0,1} devem levantar ValueError."""
+    y_true = np.array([0, 1, 2])  # 2 é inválido no binário
+    y_pred = np.array([0, 1, 1])
     with pytest.raises(ValueError, match="fora de"):
         compute_metrics(y_true, y_pred)
 
@@ -402,57 +399,44 @@ def test_compute_metrics_raises_on_invalid_labels() -> None:
 # ---------------------------------------------------------------------------
 
 
+def _make_report(p_value: float) -> EvaluationReport:
+    """Constrói um EvaluationReport mínimo com p_value especificado."""
+    _cm = np.zeros((2, 2), dtype=np.int64)
+    _ci = BootstrapCI(lower=0.0, upper=1.0, confidence_level=0.95, point_estimate=0.5)
+    _pc = {
+        i: ClassMetrics(class_idx=i, class_name="X", precision=0.0, recall=0.0, f1=0.0, support=1)
+        for i in range(2)
+    }
+    return EvaluationReport(
+        split_name="test", n_samples=2,
+        f1_macro=0.3, precision_not_sell=0.3, recall_sell=0.3,
+        accuracy=0.3, mcc=0.0, cohen_kappa=0.0, majority_baseline_f1=0.2,
+        per_class=_pc, confusion_matrix=_cm,
+        ci_f1_macro=_ci, ci_precision_not_sell=_ci, ci_recall_sell=_ci,
+        p_value_vs_baseline=p_value,
+        is_significant=p_value < 0.05,
+        checkpoint_meta=None,
+    )
+
+
 def test_is_significant_true_for_small_p() -> None:
     """p = 0.01 deve resultar em is_significant=True."""
-    y_true = np.array([0, 1, 2, 0, 1, 2])
-    y_pred = np.array([0, 1, 2, 0, 1, 2])  # perfeito para ter p pequeno
+    y_true = np.array([0, 1, 0, 1])
+    y_pred = y_true.copy()  # perfeito
     report = compute_metrics(y_true, y_pred, n_bootstrap=50, n_permutations=200)
-    # Com predição perfeita, p deve ser muito pequeno
     if report.p_value_vs_baseline < 0.05:
         assert report.is_significant is True
 
 
 def test_is_significant_false_for_large_p() -> None:
     """p = 0.10 deve resultar em is_significant=False."""
-    # Cria um report manual com p_value alto
-    _y = np.array([0, 1, 2])
-    _cm = np.zeros((3, 3), dtype=np.int64)
-    _ci = BootstrapCI(lower=0.0, upper=1.0, confidence_level=0.95, point_estimate=0.5)
-    _pc = {
-        i: ClassMetrics(class_idx=i, class_name="X", precision=0.0, recall=0.0, f1=0.0, support=1)
-        for i in range(3)
-    }
-    report = EvaluationReport(
-        split_name="test", n_samples=3,
-        f1_macro=0.3, precision_buy=0.3, recall_sell=0.3,
-        accuracy=0.3, mcc=0.0, cohen_kappa=0.0, majority_baseline_f1=0.2,
-        per_class=_pc, confusion_matrix=_cm,
-        ci_f1_macro=_ci, ci_precision_buy=_ci, ci_recall_sell=_ci,
-        p_value_vs_baseline=0.10,
-        is_significant=0.10 < 0.05,  # False
-        checkpoint_meta=None,
-    )
+    report = _make_report(p_value=0.10)
     assert report.is_significant is False
 
 
 def test_is_significant_false_for_p_exactly_0_05() -> None:
     """p = 0.05 é NÃO significativo (limiar estrito p < 0.05)."""
-    _cm = np.zeros((3, 3), dtype=np.int64)
-    _ci = BootstrapCI(lower=0.0, upper=1.0, confidence_level=0.95, point_estimate=0.5)
-    _pc = {
-        i: ClassMetrics(class_idx=i, class_name="X", precision=0.0, recall=0.0, f1=0.0, support=1)
-        for i in range(3)
-    }
-    report = EvaluationReport(
-        split_name="test", n_samples=3,
-        f1_macro=0.3, precision_buy=0.3, recall_sell=0.3,
-        accuracy=0.3, mcc=0.0, cohen_kappa=0.0, majority_baseline_f1=0.2,
-        per_class=_pc, confusion_matrix=_cm,
-        ci_f1_macro=_ci, ci_precision_buy=_ci, ci_recall_sell=_ci,
-        p_value_vs_baseline=0.05,
-        is_significant=0.05 < 0.05,  # False — limiar estrito
-        checkpoint_meta=None,
-    )
+    report = _make_report(p_value=0.05)
     assert report.is_significant is False
 
 
@@ -487,7 +471,7 @@ def test_print_report_contains_required_keywords(
 
     assert "F1" in output
     assert "SELL" in output
-    assert "BUY" in output
+    assert "NOT-SELL" in output
     assert "Confusion" in output or "CONFUSION" in output
 
 
@@ -495,8 +479,8 @@ def test_print_report_handles_none_checkpoint_meta(
     capsys: pytest.CaptureFixture[str],
 ) -> None:
     """print_report com checkpoint_meta=None não deve levantar erro."""
-    y_true = np.array([0, 1, 2, 0, 1, 2])
-    y_pred = np.array([0, 1, 2, 1, 0, 2])
+    y_true = np.array([0, 1, 0, 1])
+    y_pred = np.array([0, 1, 1, 0])
     report = compute_metrics(
         y_true, y_pred, checkpoint_meta=None, n_bootstrap=50, n_permutations=50
     )

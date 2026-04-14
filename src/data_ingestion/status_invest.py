@@ -124,6 +124,37 @@ class StatusInvestClient:
         logger.debug(f"DRE: {len(df)} trimestres, colunas={df.columns.tolist()}")
         return df
 
+    def fetch_dre_annual(self, code: str, start_year: int, end_year: int) -> pd.DataFrame:
+        """Busca o DRE anual (type=0) — fornece ROE e indicadores anualizados.
+
+        O endpoint anual retorna um período por ano com DatetimeIndex em 31/dez.
+        Utilizado como fallback quando o DRE trimestral não contém ROE (caso AGRO3).
+
+        Args:
+            code: Ticker sem sufixo, ex: 'AGRO3'.
+            start_year: Ano inicial do intervalo.
+            end_year: Ano final do intervalo.
+
+        Returns:
+            DataFrame com DatetimeIndex de 31/dez de cada ano (ascending, tz-naive),
+            colunas nomeadas pelo campo 'key' do gridLineModel
+            (ex: 'ROE', 'MargemBruta', 'Ebitda', ...).
+
+        Raises:
+            requests.HTTPError: Se a requisição falhar após 3 tentativas.
+            ValueError: Se a resposta não contiver a estrutura esperada.
+        """
+        url = (
+            f"{_BASE_URL}/acao/getdre"
+            f"?code={code.upper()}&type=0&futureData=false"
+            f"&range.min={start_year}&range.max={end_year}"
+        )
+        logger.info(f"Buscando DRE anual: {code} de {start_year} a {end_year}")
+        data = self._get(url)
+        df = self._parse_annual_grid(data)
+        logger.debug(f"DRE anual: {len(df)} anos, colunas={df.columns.tolist()}")
+        return df
+
     def fetch_balance(self, code: str, start_year: int, end_year: int) -> pd.DataFrame:
         """Busca o Balanço Patrimonial trimestral via /acao/getativos.
 
@@ -227,6 +258,53 @@ class StatusInvestClient:
             values: list[float] = [
                 float(v) if v is not None else np.nan for v in glm["values"]
             ]
+            rows[key] = values
+
+        df = pd.DataFrame(rows, index=dates)
+        df.index.name = "date"
+        return df.sort_index()
+
+    def _parse_annual_grid(self, data: dict[str, Any]) -> pd.DataFrame:
+        """Converte o grid anual do Status Invest em DataFrame com DatetimeIndex.
+
+        A resposta anual usa 'data.years' (lista de anos inteiros) como índice
+        e 'data.grid[i].gridLineModel' para os valores. Diferente do trimestral,
+        não há linha de cabeçalho separada — o índice temporal vem de data.years.
+
+        Os valores e os anos estão em ordem crescente (mais antigo primeiro).
+        Cada ano é mapeado para 31/dez do respectivo ano.
+
+        Args:
+            data: Dict com chaves 'years' e 'grid' (extraído de payload["data"]).
+
+        Returns:
+            DataFrame com DatetimeIndex de 31/dez de cada ano, ordenado
+            ascendente, com index.name='date'.
+        """
+        years: list[int] = data.get("years", [])
+        if not years:
+            raise ValueError("Resposta anual sem campo 'years'.")
+
+        dates = pd.DatetimeIndex(
+            [pd.Timestamp(year=y, month=12, day=31) for y in years]
+        )
+
+        rows: dict[str, list[float]] = {}
+        for item in data.get("grid", []):
+            if item.get("isHeader", False):
+                continue
+            glm = item.get("gridLineModel")
+            if glm is None:
+                continue
+            key: str = glm["key"]
+            raw_values: list = glm["values"]
+            # Trunca ou expande para corresponder ao número de anos
+            values: list[float] = [
+                float(v) if v is not None else np.nan
+                for v in raw_values[: len(years)]
+            ]
+            if len(values) < len(years):
+                values += [np.nan] * (len(years) - len(values))
             rows[key] = values
 
         df = pd.DataFrame(rows, index=dates)

@@ -73,9 +73,12 @@ class FundamentalFeatureBuilder:
         Para cada coluna em _FUNDAMENTAL_COLS, adiciona uma coluna
         '{col}_zscore' com o z-score calculado pela janela expansiva até t.
 
-        Os ratios brutos são preservados sem modificação. Linhas onde o
-        ratio bruto é NaN (período anterior ao lag de 45 dias) produzem
-        z-score NaN — correto, pois não há dado para normalizar.
+        Os ratios brutos são preservados sem modificação. Antes do z-score,
+        aplica-se forward-fill nos fundamentais brutos para propagar o último
+        trimestre válido a semanas onde a API retornou null (gaps intra-série).
+        Após o z-score, z-scores ainda NaN (período 2006-2011 sem cobertura do
+        Status Invest) são preenchidos com 0, representando "neutro/sem
+        informação" no espaço padronizado.
 
         Args:
             df: DataFrame com as 6 colunas de fundamentos. Primeiras linhas
@@ -84,7 +87,7 @@ class FundamentalFeatureBuilder:
         Returns:
             DataFrame com 6 novas colunas: p_vpa_zscore, ev_ebitda_zscore,
             roe_zscore, net_debt_ebitda_zscore, gross_margin_zscore,
-            dividend_yield_zscore.
+            dividend_yield_zscore. Z-scores não têm NaN residuais.
 
         Raises:
             ValueError: Se alguma coluna fundamental estiver ausente.
@@ -93,13 +96,31 @@ class FundamentalFeatureBuilder:
 
         out = df.copy()
 
+        # Forward-fill gaps intra-série: trimestres com null da API (ex.: ROE ausente
+        # em alguns quarters do Status Invest) propagam o último valor válido.
+        # Causalmente correto: usa apenas informação disponível até t.
+        for col in _FUNDAMENTAL_COLS:
+            n_before = int(out[col].isna().sum())
+            out[col] = out[col].ffill()
+            n_after = int(out[col].isna().sum())
+            if n_before != n_after:
+                logger.debug(
+                    f"ffill '{col}': {n_before} → {n_after} NaN "
+                    f"({n_before - n_after} gaps intra-série preenchidos)"
+                )
+
         for col in _FUNDAMENTAL_COLS:
             zscore_col = f"{col}_zscore"
             out[zscore_col] = self._expanding_zscore(out[col], _MIN_EXPANDING_PERIODS)
-            logger.debug(
-                f"Z-score expansivo: '{col}' → '{zscore_col}' | "
-                f"NaN: {int(out[zscore_col].isna().sum())} / {len(out)}"
-            )
+
+            # Preenche NaN residuais do período pré-cobertura (2006-2011) com 0.
+            # z=0 significa "assume-se valuation na média histórica" — neutro para o modelo.
+            n_nan = int(out[zscore_col].isna().sum())
+            if n_nan > 0:
+                out[zscore_col] = out[zscore_col].fillna(0.0)
+                logger.debug(
+                    f"Z-score '{zscore_col}': {n_nan} NaN preenchidos com 0 (pré-cobertura)"
+                )
 
         new_cols = [f"{c}_zscore" for c in _FUNDAMENTAL_COLS]
         logger.debug(

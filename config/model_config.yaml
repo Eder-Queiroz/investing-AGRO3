@@ -2,28 +2,35 @@ model:
   # Janela deslizante (em semanas)
   window_size: 52          # Hiperparâmetro principal — explorar [12, 24, 52]
 
-  # Arquitetura MLP
-  hidden_layers: [512, 256, 128, 64]
-  dropout_rates: [0.3, 0.3, 0.2, 0.2]
+  # Arquitetura MLP — reduzida para evitar overfitting (532 amostras de treino)
+  # v1: [512,256,128,64] → 786k params (razão 1478 params/amostra → overfitting severo)
+  # v2: [128,64,32]      →  163k params (razão ~307 params/amostra)
+  hidden_layers: [128, 64, 32]
+  dropout_rates: [0.5, 0.4, 0.3]
   use_batch_norm: true
   activation: "relu"       # Opções: relu, leaky_relu, gelu
 
   # Output
-  num_classes: 3           # -1 (Vender), 0 (Aguardar), 1 (Comprar)
+  num_classes: 2           # 0 (SELL), 1 (NOT-SELL = HOLD ou BUY)
 
 training:
   epochs: 200
-  batch_size: 64
-  learning_rate: 1.0e-3
-  weight_decay: 1.0e-4
+  batch_size: 32           # menor para mais updates por época com dataset pequeno
+  learning_rate: 5.0e-4    # reduzido (modelo menor converge em LR mais baixo)
+  weight_decay: 5.0e-4     # aumentado (L2 mais forte para compensar alta dimensionalidade)
   optimizer: "adamw"       # Opções: adam, adamw, sgd
   scheduler: "cosine"      # Opções: cosine, step, none
-  early_stopping_patience: 20
+  early_stopping_patience: 30  # mais paciência para convergência estável
 
-  # Divisão temporal do dataset
+  # Walk-forward Cross-Validation (regime shift mitigation)
+  # n_splits > 0 ativa walk-forward; 0 usa split cronológico único (modo legado)
+  walk_forward_n_splits: 4
+  walk_forward_min_train: 200  # mínimo de amostras de treino na primeira fold
+
+  # Divisão temporal do dataset (usado apenas se walk_forward_n_splits = 0)
   train_ratio: 0.60
   val_ratio: 0.20
-  test_ratio: 0.20
+  test_ratio: 0.20         # test fixo mesmo no modo walk-forward
 
   # Balanceamento de classes
   use_class_weights: true  # CrossEntropyLoss com peso inversamente proporcional à frequência
